@@ -1,0 +1,199 @@
+---
+title: "PBP Data"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(readr)
+library(lubridate)
+library(tidyverse)
+```
+
+
+```{r Load in Data}
+crown11_17 <- read_excel("~/Women's Basketball/CrownCollege11_17.xlsx")
+```
+
+
+
+```{r Select Relevant Variables}
+crown11_17%>%
+  select(88, 114:124, date, visname, homename)%>%
+  filter(!is.na(action))%>%
+  rename(quarter = number)%>%
+  mutate(date = mdy(date))
+```
+
+
+
+
+
+
+Function to clean up **one** game's date
+```{r}
+clean_pbp <- function(filename){
+  new_tibble <- read_excel(str_c("~/Women's Basketball/", filename, ".xlsx"))
+  new_data <- new_tibble%>%
+    select(88, 114:124, date, visname, homename)%>%
+    filter(!is.na(action))%>%
+    rename(quarter = number)%>%
+    mutate(date = mdy(date))
+}
+
+#First Game of PBP Data 11/16
+crown11_17 <- clean_pbp("CrownCollege11_17") #Got the date wrong when loading in data
+pbp_data <- bind_rows(crown11_17)
+
+#Game 2 - St. Kates 11/20
+stkates11_20 <- clean_pbp("11_20_StKates")
+pbp_data <- bind_rows(pbp_data, stkates11_20)
+
+
+#Game 3 - Gustavus 11/23
+gac11_23 <- clean_pbp("11_23_GustavusPBP")
+pbp_data <- bind_rows(pbp_data, gac11_23)
+
+#Game 4 - Macalester 11/30
+mac11_30 <- clean_pbp("11_30_MacPBP")
+pbp_data <- bind_rows(pbp_data, mac11_30)
+
+ham12_4 <- clean_pbp("12_4_Hamline_PBP")
+pbp_data <- bind_rows(pbp_data, ham12_4)
+
+smu12_8 <- clean_pbp("12_8_St_Marys_PBP")
+pbp_data <- bind_rows(pbp_data, smu12_8)
+
+augs12_11 <- clean_pbp("12_11_Augsburg_PBP")
+pbp_data <- bind_rows(pbp_data, augs12_11)
+
+carthage12_29 <- clean_pbp("12_29_Carthage_PBP")
+pbp_data <- bind_rows(pbp_data, carthage12_29)
+
+dubuque12_30 <- clean_pbp("12_30_Dubuque_PBP")
+pbp_data <- bind_rows(pbp_data, dubuque12_30)
+
+bethel1_8 <- clean_pbp("1_8_Bethel_PBP")
+pbp_data <- bind_rows(pbp_data, bethel1_8)
+
+csb1_10 <- clean_pbp("1_10_St_Bens_PBP")
+pbp_data <- bind_rows(pbp_data, csb1_10)
+
+stscho1_12 <- clean_pbp("1_12_St_Scholastica_PBP")
+pbp_data <- bind_rows(pbp_data, stscho1_12)
+
+stscho1_12 <- read_excel("~/Women's Basketball/1_12_St_Scholastica_PBP.xlsx")
+
+new_data <- stscho1_12%>%
+    select(89, 114:124, date, visname, homename)
+
+stscho1_12 <- new_data%>%
+  filter(!is.na(action))%>%
+    rename(quarter = number)%>%
+    mutate(date = mdy(date))%>%
+  select(-(to48))
+
+pbp_data <- bind_rows(pbp_data, stscho1_12)
+
+carleton1_15 <- clean_pbp("1_15_Carleton_PBP")
+pbp_data <- bind_rows(pbp_data, carleton1_15)
+
+
+mac1_19 <- clean_pbp("1_19_Macalester_PBP")
+pbp_data <- bind_rows(pbp_data, mac1_19)
+
+stkates1_22 <- clean_pbp("1_22_St_Kates_PBP")
+pbp_data <- bind_rows(pbp_data, stkates1_22)
+
+gac1_26 <- clean_pbp("1_26_Gustavus_PBP")
+pbp_data <- bind_rows(pbp_data, gac1_26)
+
+hamline1_29 <- clean_pbp("1_29_Hamline_PBP")
+pbp_data <- bind_rows(pbp_data, hamline1_29)
+
+moorhead2_2 <- clean_pbp("2_2_Concordia_Moorhead_PBP")
+pbp_data <- bind_rows(pbp_data, moorhead2_2)
+
+augsburg2_5 <- clean_pbp("2_5_Augsburg_PBP")
+pbp_data <- bind_rows(pbp_data, augsburg2_5)
+
+smu2_7 <- clean_pbp("2_7_StMarys_PBP")
+pbp_data <- bind_rows(pbp_data, smu2_7)
+
+csb2_9 <- clean_pbp("2_9_CSB_PBP")
+pbp_data <- bind_rows(pbp_data, csb2_9)
+
+carleton2_12 <- clean_pbp("2_12_Carleton_PBP")
+pbp_data <- bind_rows(pbp_data, carleton2_12)
+
+#bethel2_14 <- clean_pbp("2_14_Bethel_PBP")
+pbp_data <- bind_rows(pbp_data, bethel2_14)
+
+
+bethel2_14 <- read_excel("~/Women's Basketball/2_14_Bethel_PBP.xlsx")
+
+new_data1 <- bethel2_14%>%
+    select(89, 114:124, date, visname, homename)
+
+bethel2_14 <- new_data1%>%
+  filter(!is.na(action))%>%
+    rename(quarter = number)%>%
+    mutate(date = mdy(date))%>%
+  select(-(to48))
+
+pbp_data <- bind_rows(pbp_data, bethel2_14)
+
+
+css2_16 <- clean_pbp("2_16_StScholastica_PBP")
+pbp_data <- bind_rows(pbp_data, css2_16)
+
+
+
+
+#Any subsequent Games
+# game5 <- clean_pbp()
+# pbp_data <- bind_rows(pbp_data, game2)
+
+
+write_csv(pbp_data, "~/Women's Basketball/PBP_Data_Through_12_11.csv")
+
+write_csv(pbp_data, "~/Women's Basketball/PBP_Data_Through_1_15.csv")
+
+
+write_csv(pbp_data, "~/Women's Basketball/PBP_Data_Through_2_16.csv")
+
+
+```
+
+Let's do some cool shit
+```{r}
+pbp%>%
+    group_by(quarter, time50, date) %>%
+  filter(team == "STO",
+         action == "ASSIST" | action == "GOOD" | action == "MISS" | action == "TURNOVER") %>%
+  mutate(points_scored = ifelse(action == "GOOD" & type == "LAYUP", 2, 0),
+         points_scored = ifelse(action == "GOOD" & type == "JUMPER", 2, points_scored),
+         points_scored = ifelse(action == "GOOD" & type == "3PTR", 3, points_scored),
+         points_scored = ifelse(action == "GOOD" & type == "LAYUP", 2, points_scored),
+         points_scored = ifelse(action == "GOOD" & type == "FT", 1, points_scored),
+         possession = 1,
+         total_game_points = sum(points_scored),
+         total_game_possessions = sum(possession),
+         exp_pos_pts = total_game_points/total_game_possessions,
+         pts_over_exp = points_scored - exp_pos_pts) %>%
+  ungroup() %>%
+  group_by(checkname52) %>%
+  summarise(points_added = sum(pts_over_exp))
+```
+
+```{r}
+adv_stats <- read_excel("~/Women's Basketball/Adv_Stats_Trial.xlsx")
+```
+
+
+
+
+

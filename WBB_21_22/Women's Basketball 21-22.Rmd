@@ -1,0 +1,308 @@
+---
+title: "Women's Basketball 2021-2022"
+author: "Tyson Hart"
+date: "12/20/2021"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(nlme)
+library(mosaic)
+library(base)
+#library(stargazer)
+#library(lmtest)
+#library(sandwich)
+#library(car)
+library(plm)
+#library(modelsummary)
+library(lubridate)
+library(rlang)
+library(tidyr)
+
+pbp<- pbp_data
+lu <- lineupData
+
+```
+
+```{r}
+pbp %>%
+  group_by(quarter, time50, date) %>%
+  filter(team == "STO",
+         action == "ASSIST" | action == "GOOD" | action == "MISS" | action == "TURNOVER") %>%
+  mutate(points_scored = ifelse(action == "GOOD" & type == "LAYUP", 2, 0),
+         points_scored = ifelse(action == "GOOD" & type == "JUMPER", 2, points_scored),
+         points_scored = ifelse(action == "GOOD" & type == "3PTR", 3, points_scored),
+         points_scored = ifelse(action == "GOOD" & type == "LAYUP", 2, points_scored),
+         points_scored = ifelse(action == "GOOD" & type == "FT", 1, points_scored),
+         possession = 1,
+         total_game_points = sum(points_scored),
+         total_game_possessions = sum(possession),
+         exp_pos_pts = total_game_points/total_game_possessions,
+         pts_over_exp = points_scored - exp_pos_pts) %>%
+  ungroup() %>%
+  group_by(checkname52) %>%
+  summarise(points_added = sum(pts_over_exp))
+```
+
+```{r}
+lu1.0 <- lu %>%
+  separate(Time, into = c("min", "sec"), sep = ":") %>%
+  mutate(min = parse_number(min),
+         sec = parse_number(sec),
+         total_mins = ((min*60) + sec)/60,
+         Hegland = str_detect(Lineup, "Hegland"),
+         Olmen = str_detect(Lineup, "Olmen"),
+         Lewis = str_detect(Lineup, "Lewis"),
+         Fix = str_detect(Lineup, "Fix"),
+         Kelly = str_detect(Lineup, "Kelly"),
+         Howdeshell = str_detect(Lineup, "Howdeshell"),
+         Yagodinski = str_detect(Lineup, "Yagodinski"),
+         Tangen = str_detect(Lineup, "Tangen"),
+         Kormann = str_detect(Lineup, "Kormann"),
+         Botten = str_detect(Lineup, "Botten"),
+         Henson = str_detect(Lineup, "Henson"),
+         Elstad = str_detect(Lineup, "Elstad"),
+         Scott = str_detect(Lineup, "Scott")) 
+```
+
+```{r}
+individual_summary <- function(player) {
+  lu1.0 %>%
+  filter({{player}} == TRUE) %>%
+  mutate(pts_allowed = Score - Score_Diff) %>%
+  summarise(mins = sum(total_mins),
+            pts_per_min = sum(Score) / mins,
+            pts_allowed_per_min = sum(pts_allowed) / mins,
+            pt_dif = pts_per_min - pts_allowed_per_min,
+            reb_per_min = sum(Reb) / mins,
+            stl_per_min = sum(Stl) / mins,
+            tov_per_min = sum(Tov) / mins,
+            ast_per_min = sum(Ast) / mins)
+}
+
+combining_data <- function(p) {
+  for (i in players) {
+    p <- bind_rows(p, individual_summary({{i}})) 
+      print(i)
+      for (l in range[9]) {
+        
+      }
+  }
+}
+
+combining_data(tibble())
+
+Hegland <- tibble(individual_summary(Hegland)) %>%
+  add_column(player = "Hegland")
+
+Scott <- tibble(individual_summary(Scott)) %>%
+  add_column(player = "Scott")
+
+Elstad <- tibble(individual_summary(Elstad)) %>%
+  add_column(player = "Elstad")
+
+Henson <- tibble(individual_summary(Henson)) %>%
+  add_column(player = "Henson")
+
+Kormann <- tibble(individual_summary(Kormann)) %>%
+  add_column(player = "Kormann")
+
+Tangen <- tibble(individual_summary(Tangen)) %>%
+  add_column(player = "Tangen")
+ 
+Yagodinski <- tibble(individual_summary(Yagodinski)) %>%
+  add_column(player = "Yagodinski")
+
+Howdeshell <- tibble(individual_summary(Howdeshell)) %>%
+  add_column(player = "Howdeshell")
+
+Kelly <- tibble(individual_summary(Kelly)) %>%
+  add_column(player = "Kelly")
+
+Fix <- tibble(individual_summary(Fix)) %>%
+  add_column(player = "Fix")
+
+Lewis <- tibble(individual_summary(Lewis)) %>%
+  add_column(player = "Lewis")
+  
+Olmen <- tibble(individual_summary(Olmen)) %>%
+  add_column(player = "Olmen")
+
+Botten <- tibble(individual_summary(Botten)) %>%
+  add_column(player = "Botten")
+
+ind_sum_stats <- bind_rows(Hegland, Kormann, Tangen, Yagodinski, Kelly, Fix, Lewis, Olmen, Botten)
+```
+
+```{r NEW CODE - TWO PLAYER LINEUPS}
+
+players <- c("Olmen", "Lewis", "Fix", "Kelly", "Kormann", "Tangen", "Botten", "Yagodinski", "Hegland")
+
+two_plyr_summary_test <- function(df, player1, player2) {
+  player1_col <- sym(player1)
+  player2_col <- sym(player2)
+  df %>%
+  filter({{player1_col}} == TRUE, {{player2_col}} == TRUE)%>%
+  mutate(pts_allowed = Score - Score_Diff) %>%
+  summarise(mins = sum(total_mins),
+            pts_per_min = sum(Score) / mins,
+            pts_allowed_per_min = sum(pts_allowed) / mins,
+            pt_dif = pts_per_min - pts_allowed_per_min,
+            reb_per_min = sum(Reb) / mins,
+            stl_per_min = sum(Stl) / mins,
+            tov_per_min = sum(Tov) / mins,
+            ast_per_min = sum(Ast) / mins)%>%
+    mutate(player1 = player1,
+           player2 = player2)
+}
+
+
+two_person_lineups <- tibble()
+
+for(i in 1:length(players)){
+  for(j in 1:length(players)){
+    if(i < j){
+      hold<- two_plyr_summary_test(lu1.0, players[i], players[j])
+      two_person_lineups <- bind_rows(two_person_lineups, hold)
+    }
+  }
+}
+
+two_person_lineups #All 36 two_person lineups voila
+
+
+
+
+three_plyr_summary_test <- function(df, player1, player2, player3) {
+  player1_col <- sym(player1)
+  player2_col <- sym(player2)
+  player3_col <- sym(player3)
+  df %>%
+  filter({{player1_col}} == TRUE, {{player2_col}} == TRUE, {{player3_col}} == TRUE)%>%
+  mutate(pts_allowed = Score - Score_Diff) %>%
+  summarise(mins = sum(total_mins),
+            pts_per_min = sum(Score) / mins,
+            pts_allowed_per_min = sum(pts_allowed) / mins,
+            pt_dif = pts_per_min - pts_allowed_per_min,
+            reb_per_min = sum(Reb) / mins,
+            stl_per_min = sum(Stl) / mins,
+            tov_per_min = sum(Tov) / mins,
+            ast_per_min = sum(Ast) / mins)%>%
+    mutate(player1 = player1,
+           player2 = player2,
+           player3 = player3)
+}
+
+three_plyr_summary_test(lu1.0, "Kelly", "Fix", "Olmen")%>%
+  print(width = Inf)
+
+#Basic Template for 3 person lineups without all code
+# for(i in 1:5){
+#   for(j in 1:5){
+#     if(i < j){
+#     for (k in 1:5){
+#       if(j<k){
+#       print(paste0(i, j, k))
+#       }
+#     }
+#     }
+#   }
+# }
+
+#3 person
+three_person_lineups <- tibble()
+
+for(i in 1:length(players)){
+  for(j in 1:length(players)){
+    if(i<j){
+    for (k in 1:length(players)){
+      if(j<k){
+        hold<- three_plyr_summary_test(lu1.0, players[i], players[j], players[k])
+        three_person_lineups <- bind_rows(three_person_lineups, hold)    
+        }
+      }
+    }
+  }
+}
+three_person_lineups <- three_person_lineups%>%
+  filter(mins!=0)
+
+
+
+
+expand.grid(players, players, players)
+
+as_tibble(expand.grid(players, players))%>%
+  filter(as.character(Var1)<as.character(Var2))
+
+
+
+```
+
+
+```{r}
+
+two_plyr_summary <- function(player1, player2) {
+  lu1.0 %>%
+  filter({{player1}} == TRUE, {{player2}} == TRUE) %>%
+  mutate(pts_allowed = Score - Score_Diff) %>%
+  summarise(mins = sum(total_mins),
+            pts_per_min = sum(Score) / mins,
+            pts_allowed_per_min = sum(pts_allowed) / mins,
+            pt_dif = pts_per_min - pts_allowed_per_min,
+            reb_per_min = sum(Reb) / mins,
+            stl_per_min = sum(Stl) / mins,
+            tov_per_min = sum(Tov) / mins,
+            ast_per_min = sum(Ast) / mins)
+}
+
+  
+
+
+Hegland <- tibble(two_plyr_summary(Hegland)) %>%
+  add_column(player = "Hegland")
+
+Scott <- tibble(two_plyr_summary(Scott)) %>%
+  add_column(player = "Scott")
+
+Elstad <- tibble(two_plyr_summary(Elstad)) %>%
+  add_column(player = "Elstad")
+
+Henson <- tibble(two_plyr_summary(Henson)) %>%
+  add_column(player = "Henson")
+
+Kormann <- tibble(two_plyr_summary(Kormann)) %>%
+  add_column(player = "Kormann")
+
+Tangen <- tibble(two_plyr_summary(Tangen)) %>%
+  add_column(player = "Tangen")
+ 
+Yagodinski <- tibble(two_plyr_summary(Yagodinski)) %>%
+  add_column(player = "Yagodinski")
+
+Howdeshell <- tibble(two_plyr_summary(Howdeshell)) %>%
+  add_column(player = "Howdeshell")
+
+Kelly_Lewis <- tibble(two_plyr_summary(Kelly, Lewis)) %>%
+  add_column(player = "Kelly")
+
+Fix <- tibble(two_plyr_summary(Fix)) %>%
+  add_column(player = "Fix")
+
+Lewis <- tibble(two_plyr_summary(Lewis)) %>%
+  add_column(player = "Lewis")
+  
+Olmen <- tibble(two_plyr_summary(Olmen)) %>%
+  add_column(player = "Olmen")
+
+Botten <- tibble(two_plyr_summary(Botten)) %>%
+  add_column(player = "Botten")
+
+two_plyr_sum_stats <- bind_rows(Hegland, Kormann, Tangen, Yagodinski, Kelly, Fix, Lewis, Olmen, Botten)
+```
+

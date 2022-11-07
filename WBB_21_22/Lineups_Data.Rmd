@@ -1,0 +1,211 @@
+---
+title: "Lineups"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(readr)
+library(lubridate)
+library(tidyverse)
+```
+
+
+
+
+```{r}
+crown11_16_lineups_raw <- read_excel("~/Women's Basketball/11_16_CrownLineups.xlsx")
+
+
+#ADD COLUMNS FOR DATE AND OPPONENT
+crown11_16_lineups <- crown11_16_lineups_raw%>%
+  rename(Lineup = 1,
+         Time = 2,
+         Score = 3, 
+         Score_Diff = 4,
+    Pts_Min = 5,
+    Reb = 6,
+    Stl = 7,
+    Tov = 8, 
+    Ast = 9,
+    PPP = 10)%>%
+  mutate(date = mdy("11/16/21"),
+         opp = "Crown College")
+
+```
+
+
+
+
+```{r Function for loading in lineup data}
+clean_lineups <- function(filename, dt, opponent){
+  new_tibble <- read_excel(str_c("~/Women's Basketball/", filename, ".xlsx"))
+  new_data <- new_tibble%>%
+    rename(Lineup = 1,
+         Time = 2,
+         Score = 3, 
+         Score_Diff = 4,
+    Pts_Min = 5,
+    Reb = 6,
+    Stl = 7,
+    Tov = 8, 
+    Ast = 9,
+    PPP = 10)%>%
+  mutate(date = mdy(dt),
+         opp = opponent,
+         Score = parse_number(Score),
+         Score_Diff = parse_number(Score_Diff),
+         Pts_Min = parse_number(Pts_Min),
+         Reb = parse_number(Reb),
+         Stl = parse_number(Stl),
+         Tov = parse_number(Tov),
+         Ast = parse_number(Ast),
+         min = parse_number(Time),
+         sec = parse_number(str_extract(Time, ":\\d\\d")),
+         total_sec = min*60 + sec)
+}
+
+
+#Game 1
+crown11_16_lineups <- clean_lineups("11_16_CrownLineups", "11/16/2021", "Crown College")
+
+lineupData <- tibble()
+lineupData <- bind_rows(lineupData, crown11_16_lineups)
+
+#Game 2 - St. Kates 11/20
+stkates11_20_lineups <- clean_lineups("11_20_StKatesLineups", "11/20/2021", "St. Catherine's University")
+lineupData <- bind_rows(lineupData, stkates11_20_lineups)
+
+gac11_23_lineups <- clean_lineups("11_23_GacLineups", "11/23/2021", "Gustavus Adolphus College")
+lineupData <- bind_rows(lineupData, gac11_23_lineups)
+
+mac11_30_lineups <- clean_lineups("11_30_Mac_Lineups", "11/30/2021", "Macalester College")
+lineupData <- bind_rows(lineupData, mac11_30_lineups)
+
+ham12_4_lineups <- clean_lineups("12_4_Hamline_Lineups", "12/4/2021", "Hamline University")
+lineupData <- bind_rows(lineupData, ham12_4_lineups)
+
+smu12_8_lineups <- clean_lineups("12_8_St_Marys_Lineups", "12/8/2021", "St. Mary's University")
+lineupData <- bind_rows(lineupData, smu12_8_lineups)
+
+augsburg12_11_lineups <- clean_lineups("12_11_Augsburg_Lineups", "12/11/2021", "Augsburg University")
+lineupData <- bind_rows(lineupData, augsburg12_11_lineups)
+
+carthage12_29_lineups <- clean_lineups("12_29_Carthage_Lineups", "12/29/2021", "Carthage College")
+lineupData <- bind_rows(lineupData, carthage12_29_lineups)
+
+dubuque12_30_lineups <- clean_lineups("12_30_Dubuque_Lineups", "12/30/2021", "University of Dubuque")
+lineupData <- bind_rows(lineupData, dubuque12_30_lineups)
+
+bethel1_8_lineups <- clean_lineups("1_8_Bethel_Lineups", "1/8/2022", "Bethel University")
+lineupData <- bind_rows(lineupData, bethel1_8_lineups )
+
+
+csb1_10_lineups <- clean_lineups("1_10_St_Bens_Lineups", "1/10/2022", "College of Saint Benedict")
+lineupData <- bind_rows(lineupData, csb1_10_lineups)
+
+
+stscho1_12_lineups <- clean_lineups("1_12_St_Scholastica_Lineups", "1/12/2022", "College of St Scholastica")
+lineupData <- bind_rows(lineupData, stscho1_12_lineups)
+
+
+carleton1_15_lineups <- clean_lineups("1_15_Carleton_Lineups", "1/15/2022", "Carleton College")
+lineupData <- bind_rows(lineupData, carleton1_15_lineups)
+
+
+mac1_19_lineups <- clean_lineups("1_19_Macalester_Lineups", "1/19/2022", "Macalester College")
+lineupData <- bind_rows(lineupData, mac1_19_lineups)
+
+
+stkates1_22_lineups <- clean_lineups("1_22_St_Kates_Lineups", "1/22/2022", "St. Kates University")
+lineupData <- bind_rows(lineupData, stkates1_22_lineups)
+
+gac1_22_lineups <- clean_lineups("1_26_Gustavus_Lineups", "1/26/2022", "Gustavus Adolphus College") ## SORRY NAMED IT 22 SHOULD BE 26
+
+lineupData <- bind_rows(lineupData, gac1_22_lineups)
+
+
+hamline1_29_lineups <- clean_lineups("1_29_Hamline_Lineups", "1/29/2022", "Hamline University")
+lineupData <- bind_rows(lineupData, hamline1_29_lineups)
+
+concordia_moorhead_2_2_lineups <- clean_lineups("2_2_Concordia_Moorhead_Lineups", "2/2/2022", "Concordia-Moorhead College")
+lineupData <- bind_rows(lineupData, concordia_moorhead_2_2_lineups)
+
+augsburg2_5_lineups <- clean_lineups("2_5_Augsburg_Lineups", "2/5/2022", "Augsburg University")
+lineupData <- bind_rows(lineupData, augsburg2_5_lineups)
+
+smu2_7_lineups <- clean_lineups("2_7_StMarys_Lineups", "2/7/2022", "St. Mary's University")
+lineupData <- bind_rows(lineupData, smu2_7_lineups)
+
+csb2_9_lineups <- clean_lineups("2_9_CSB_Lineups", "2/9/2022", "College of Saint Benedict")
+lineupData <- bind_rows(lineupData, csb2_9_lineups)
+
+carleton2_12_lineups <- clean_lineups("2_12_Carleton_Lineups", "2/12/2022", "Carleton College")
+lineupData <- bind_rows(lineupData, carleton2_12_lineups)
+
+bethel2_14_lineups <- clean_lineups("2_14_Bethel_Lineups", "2/14/2022", "Bethel Univeristy")
+lineupData <- bind_rows(lineupData, bethel2_14_lineups)
+
+css2_16_lineups <- clean_lineups("2_16_StScholastica_Lineups", "2/16/2022", "College of St Scholastica")
+css2_16_lineups <- css2_16_lineups%>%
+  filter(!is.na(Pts_Min))
+lineupData <- bind_rows(lineupData, css2_16_linups)
+
+
+
+
+lineupData <- lineupData%>%
+  mutate(min = parse_number(Time),
+         sec = parse_number(str_extract(Time, ":\\d\\d")),
+         total_sec = min*60 + sec)
+
+
+#Next game
+# game3 <- clean_lineups()
+# lineupData <- bind_rows(lineupData, game3)
+
+lineupData <- lineupData%>%
+  mutate(min = parse_number(Time),
+         sec = parse_number(str_extract(Time, ":\\d\\d")),
+         total_sec = min*60 + sec)
+
+lineupData%>%
+  count(Lineup, sort = TRUE)%>%
+  print(n = 30)
+
+
+write_csv(lineupData, "~/Women's Basketball/Lineups_Through_12_11.csv")
+
+
+write_csv(lineupData, "~/Women's Basketball/Lineups_Through_1_15.csv")
+
+write_csv(lineupData, "~/Women's Basketball/Lineups_Through_2_16.csv")
+
+
+
+lineupData%>%
+  group_by(Lineup)%>%
+  summarize(score_diff_sum = sum(Score_Diff))%>%
+  arrange(score_diff_sum)
+
+
+lineupData%>%
+  group_by(Lineup)%>%
+  summarize(mean_PPP = mean(PPP),
+            time = Time)%>%
+  arrange(desc(mean_PPP))
+
+
+lineupData %>%
+  group_by(Lineup)%>%
+  summarize(time_played = sum(total_sec))%>%
+  arrange(desc(time_played))
+
+
+```
+
+
+
