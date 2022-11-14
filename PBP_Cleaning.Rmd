@@ -1,0 +1,35 @@
+---
+title: "WBB_22_23_PBP"
+author: "Andrew Noecker"
+date: "2022-11-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(readr)
+library(lubridate)
+library(tidyverse)
+```
+
+
+
+```{r}
+clean_pbp <- function(filename){
+  new_tibble <- read_excel(str_c("~/Desktop/Sports Analytics/STO_WBB_2022_23/data/", filename, ".xlsx"))
+  new_data <- new_tibble%>%
+    select(88, 114:124, date, visname, homename)%>%
+    filter(!is.na(action))%>%
+    rename(quarter = number)%>%
+    mutate(date = mdy(date))
+}
+
+```
+
+
+```{r}
+clean_pbp("11_11_Alma_PBP")
+```
+
+
