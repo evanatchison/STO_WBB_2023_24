@@ -1,0 +1,170 @@
+---
+title: "Game_Report"
+author: "Andrew Noecker"
+date: "2022-11-07"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(gt)
+library(DT)
+source("Lineup_Cleaning.R")
+source("PBP_Cleaning.R")
+```
+
+
+```{r}
+lu1.0 <- lineups %>%
+  separate(Time, into = c("min", "sec"), sep = ":") %>%
+  mutate(min = parse_number(min),
+         sec = parse_number(sec),
+         total_mins = ((min*60) + sec)/60,
+         Hegland = str_detect(Lineup, "Hegland"),
+         Olmen = str_detect(Lineup, "Olmen"),
+         Fix = str_detect(Lineup, "Fix"),
+         Kelly = str_detect(Lineup, "Kelly"),
+         Howdeshell = str_detect(Lineup, "Howdeshell"),
+         Yagodinski = str_detect(Lineup, "Yagodinski"),
+         Johnson = str_detect(Lineup, "Johnson"),
+         Tangen = str_detect(Lineup, "Tangen"),
+         Kormann = str_detect(Lineup, "Kormann"),
+         Botten = str_detect(Lineup, "Botten"),
+         Zhen = str_detect(Lineup, "Zhen"))
+
+players = c("Hegland", "Olmen", "Fix", "Kelly", "Howdeshell", "Yagodinski", "Johnson", "Tangen", "Kormann", "Botten", "Zhen")
+```
+
+
+Outline:
+
+
+# **Individual Summary Statistics**
+
+```{r, include = FALSE}
+individual_summary <- function(player) {
+  lu1.0 %>%
+  filter(eval(rlang::data_sym({{player}})) == TRUE) %>%
+  mutate(pts_allowed = Score - Score_Diff) %>%
+  summarise(mins = sum(total_mins),
+            pts_per_min = sum(Score) / mins,
+            pts_allowed_per_min = sum(pts_allowed) / mins,
+            pt_dif = pts_per_min - pts_allowed_per_min,
+            reb_per_min = sum(Reb) / mins,
+            stl_per_min = sum(Stl) / mins,
+            tov_per_min = sum(Tov) / mins,
+            ast_per_min = sum(Ast) / mins) %>%
+  add_column(player = player)
+}
+
+lu1.0 %>%
+  filter(eval(rlang::data_sym("Hegland")) == TRUE)
+
+tmp <- tibble()
+
+
+for (i in players) {
+  tmp_row <- individual_summary(i)  
+  tmp <- bind_rows(tmp, tmp_row)
+}
+
+ind_sum_stats <- tmp %>%
+  select(player, 1:8) %>% 
+  arrange(-mins)
+  
+```
+
+
+```{r}
+ind_sum_stats %>%
+  arrange(-pt_dif) %>%
+  gt() %>%
+  fmt_number(columns = c(where(is.numeric)), decimals = 2) %>%
+  data_color(
+    columns = vars(pt_dif),
+    colors = scales::col_numeric(
+      palette = c("red", "green"),
+      domain = c(-1, 1),
+      ), alpha = 0.8
+  ) %>%
+  tab_header(
+    title = md("**Individual Player Summaries STO WBB 22-23**"),
+    subtitle = paste0("Through ", max(pbp$date))
+)
+```
+
+
+
+# **Lineup Reports** {.tabset .tabset-fade .tabset-pills}
+
+## 5 Person Lineups {.tabset .tabset-fade .tabset-pills}
+
+
+
+
+## 4 Person Lineups {.tabset .tabset-fade .tabset-pills}
+
+
+
+
+## 3 Person Lineups {.tabset .tabset-fade .tabset-pills}
+
+
+
+
+## 2 Person Lineups {.tabset .tabset-fade .tabset-pills}
+
+
+```{r}
+two_plyr_summary_test <- function(df, player1, player2) {
+  player1_col <- sym(player1)
+  player2_col <- sym(player2)
+  df %>%
+  filter({{player1_col}} == TRUE, {{player2_col}} == TRUE)%>%
+  mutate(pts_allowed = Score - Score_Diff) %>%
+  summarise(mins = sum(total_mins),
+            pts_per_min = sum(Score) / mins,
+            pts_allowed_per_min = sum(pts_allowed) / mins,
+            pt_dif = pts_per_min - pts_allowed_per_min,
+            reb_per_min = sum(Reb) / mins,
+            stl_per_min = sum(Stl) / mins,
+            tov_per_min = sum(Tov) / mins,
+            ast_per_min = sum(Ast) / mins)%>%
+    mutate(player1 = player1,
+           player2 = player2)
+}
+
+two_person_lineups <- tibble()
+
+for(i in 1:length(players)){
+  for(j in 1:length(players)){
+    if(i < j){
+      hold<- two_plyr_summary_test(lu1.0, players[i], players[j])
+      two_person_lineups <- bind_rows(two_person_lineups, hold)
+    }
+  }
+}
+
+two_person_lineups %>%
+  select(player1, player2, 1:8) %>%
+  arrange(-mins) %>%
+  filter(mins > 2) %>%
+  gt() %>%
+  fmt_number(columns = c(where(is.numeric)), decimals = 2) %>%
+  data_color(
+    columns = vars(pt_dif),
+    colors = scales::col_numeric(
+      palette = c("red", "green"),
+      domain = c(-1, 1),
+      ), alpha = 0.8
+  ) %>%
+  tab_header(
+    title = md("**2 Player Lineup Summaries STO WBB 22-23**"),
+    subtitle = paste0("Through ", max(pbp$date)))
+  
+  #All 36 two_person lineups voila
+
+```
+
