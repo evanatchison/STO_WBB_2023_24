@@ -8,9 +8,10 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 library(gt)
 library(DT)
+library(tidyverse)
 source("Lineup_Cleaning.R")
 source("PBP_Cleaning.R")
 ```
@@ -79,11 +80,12 @@ ind_sum_stats <- tmp %>%
 
 ```{r}
 ind_sum_stats %>%
+  filter(mins > 2) %>%
   arrange(-pt_dif) %>%
   gt() %>%
   fmt_number(columns = c(where(is.numeric)), decimals = 2) %>%
   data_color(
-    columns = vars(pt_dif),
+    columns = c(pt_dif),
     colors = scales::col_numeric(
       palette = c("red", "green"),
       domain = c(-1, 1),
@@ -130,7 +132,8 @@ three_plyr_summary_test <- function(df, player1, player2, player3) {
             ast_per_min = sum(Ast) / mins)%>%
     mutate(player1 = player1,
            player2 = player2,
-           player3 = player3)
+           player3 = player3) %>%
+    select(player1:player3, 1:8)
 }
 
 three_plyr_summary_test(lu1.0, "Kelly", "Fix", "Olmen")%>%
@@ -165,17 +168,30 @@ for(i in 1:length(players)){
   }
 }
 
-three_person_lineups <- three_person_lineups%>%
-  filter(mins!=0)
+three_person_lineups <- three_person_lineups %>%
+  arrange(-mins) %>%
+  filter(mins > 2) 
+
+lu_names3 <- c("Player 1",
+              "Player 2",
+              "Player 3",
+              "Min", 
+              "Pts/Min", 
+              "Pts Allowed/Min", 
+              "Point Diff", 
+              "Reb/Min",
+              "Stl/Min",
+              "TOV/Min",
+              "Ast/Min")
+
+colnames(three_person_lineups) <- lu_names3
 
 
 three_person_lineups %>%
-  arrange(-mins) %>%
-  filter(mins > 2) %>%
   gt() %>%
   fmt_number(columns = c(where(is.numeric)), decimals = 2) %>%
   data_color(
-    columns = vars(pt_dif),
+    columns = c(`Point Diff`),
     colors = scales::col_numeric(
       palette = c("red", "green"),
       domain = c(-2, 2),
@@ -185,22 +201,24 @@ three_person_lineups %>%
     title = md("**3 Player Lineup Summaries STO WBB 22-23**"),
     subtitle = paste0("Through ", max(pbp$date)))
 
-expand.grid(players, players, players)
 
-combos <- as_tibble(expand.grid(players, players))%>%
-  filter(as.character(Var1) != as.character(Var2),
-         as.character(Var1)<as.character(Var2)) %>% 
-  mutate(Var1 = as.character(Var1),
-         Var2 = as.character(Var2))
-
-
-combos[1,]
-
-
-
-two_plyr_summary_test(lu1.0, combos$Var1[1], combos$Var2[1])
-
-two_plyr_summary_test(lu1.0, as.character(combos$Var1[1]), as.character(combos$Var2[1]))
+#### Trial code to not to do lineup options with a bunch of for loops - unsuccessful for now
+# expand.grid(players, players, players)
+# 
+# combos <- as_tibble(expand.grid(players, players, players))%>%
+#   filter(as.character(Var1) != as.character(Var2),
+#          as.character(Var1)<as.character(Var2)) %>% 
+#   mutate(Var1 = as.character(Var1),
+#          Var2 = as.character(Var2))
+# 
+# 
+# combos[1,]
+# 
+# 
+# 
+# two_plyr_summary_test(lu1.0, combos$Var1[1], combos$Var2[1])
+# 
+# two_plyr_summary_test(lu1.0, as.character(combos$Var1[1]), as.character(combos$Var2[1]))
 ```
 
 
@@ -226,7 +244,8 @@ two_plyr_summary_test <- function(df, player1, player2) {
             tov_per_min = sum(Tov) / mins,
             ast_per_min = sum(Ast) / mins)%>%
     mutate(player1 = player1,
-           player2 = player2)
+           player2 = player2) %>%
+    select(player1, player2, 1:8)
 }
 
 two_person_lineups <- tibble()
@@ -240,19 +259,33 @@ for(i in 1:length(players)){
   }
 }
 
+lu_names2 <- c("Player 1", 
+               "Player 2",
+               "Min", 
+              "Pts/Min", 
+              "Pts Allowed/Min", 
+              "Point Diff", 
+              "Reb/Min",
+              "Stl/Min",
+              "TOV/Min",
+              "Ast/Min")
+
+two_person_lineups <- two_person_lineups %>%
+  arrange(-mins) %>%
+  filter(mins > 2)
+  
+colnames(two_person_lineups) <- lu_names2
 
 
 two_person_lineups %>%
-  select(player1, player2, 1:8) %>%
-  arrange(-mins) %>%
-  filter(mins > 2) %>%
+  select(`Player 1`, `Player 2`, 1:8) %>%
   gt() %>%
   fmt_number(columns = c(where(is.numeric)), decimals = 2) %>%
   data_color(
-    columns = vars(pt_dif),
+    columns = c(`Point Diff`),
     colors = scales::col_numeric(
       palette = c("red", "green"),
-      domain = c(-1, 1),
+      domain = c(-2, 2),
       ), alpha = 0.8
   ) %>%
   tab_header(
