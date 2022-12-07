@@ -19,58 +19,11 @@ library(lubridate)
 
 source("Lineup_Cleaning.R")
 
-lineups %>%
+lineups <- lineups %>%
   separate(Time, into = c("min", "sec"), sep = ":") %>%
   mutate(min = parse_number(min),
          sec = parse_number(sec),
          game_time = ((min*60) + sec)/60)
-```
-
-```{r, comparing guards}
-#stats with cassie in the game
-lineups %>%
-  filter(str_detect(Lineup, "Fix C")) %>%
-  summarise(total_mins = sum(game_time),
-            point_diff = sum(Score_Diff)/total_mins,
-            ppm = sum(Pts_Min, na.rm = TRUE)*total_mins/count(Lineup),
-            ppp = sum(PPP)/total_mins
-            )
-
-#stats with k'lynn in the game
-lineups %>%
-  filter(str_detect(Lineup, "Lewis K")) %>%
-  summarise(total_mins = sum(game_time),
-            point_diff = sum(Score_Diff)/total_mins,
-            ppm = sum(Pts_Min, na.rm = TRUE)/total_mins,
-            ppp = sum(PPP)/total_mins
-            )
-
-#stats with both cassie and k'lynn in the game
-lineups %>%
-  filter(str_detect(Lineup, "Lewis K"), str_detect(Lineup, "Fix C")) %>%
-  summarise(total_mins = sum(game_time),
-            point_diff = sum(Score_Diff)/total_mins,
-            ppm = sum(Pts_Min, na.rm = TRUE)/total_mins,
-            ppp = sum(PPP)/total_mins
-            )
-
-#stats with k'lynn in and cassie not in
-lineups %>%
-  filter(str_detect(Lineup, "Lewis K"), str_detect(Lineup, "Fix C", negate = TRUE)) %>%
-  summarise(total_mins = sum(game_time),
-            point_diff = sum(Score_Diff)/total_mins,
-            ppm = sum(Pts_Min, na.rm = TRUE)/total_mins,
-            ppp = sum(PPP)/total_mins
-            )
-
-#stats with cassie in and k'lynn not in
-lineups %>%
-  filter(str_detect(Lineup, "Lewis K", negate = TRUE), str_detect(Lineup, "Fix C")) %>%
-  summarise(total_mins = sum(game_time),
-            point_diff = sum(Score_Diff)/total_mins,
-            ppm = sum(Pts_Min, na.rm = TRUE)/total_mins,
-            ppp = sum(PPP)/total_mins
-            )
 ```
 
 ```{r, messing around}
@@ -105,12 +58,14 @@ analyze <- function(player){
 analyze("Botten")
 analyze("Fix")
 analyze("Hegland")
+analyze("Howdeshell")
+analyze("Johnson")
 analyze("Kelly")
 analyze("Kormann")
-analyze("Lewis")
 analyze("Olmen")
 analyze("Tangen")
 analyze("Yagodinski")
+analyze("Zhen")
 ```
 
 ```{r}

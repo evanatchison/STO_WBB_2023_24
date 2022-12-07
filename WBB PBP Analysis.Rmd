@@ -2,6 +2,8 @@
 title: "WBB PBP Analysis"
 output: html_document
 date: '2022-12-07'
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -21,7 +23,7 @@ source("PBP_Cleaning.R")
 pbp <-pbp %>%
   filter(team == "STO")
 
-pbp2 <- read_csv("PBP_Data_Through_2_16.csv")
+pbp2 <- pbp
 ```
 
 ```{r}
@@ -99,7 +101,8 @@ ggplot(data = shooting_by_quarter,
            y = shooting_pct,
            color = fct_reorder2(checkname52, quarter, shooting_pct))) +
   geom_point() +
-  geom_smooth(se = FALSE) +
+  geom_line() +
+  #geom_smooth(se = FALSE) +
   labs(title = "Shooting Percentage by Quarter",
        y = "shooting percentage",
        color = "player") +
@@ -108,14 +111,16 @@ ggplot(data = shooting_by_quarter,
 shooting_by_quarter <- shooting_by_quarter %>%
   mutate(checkname52 = tolower(checkname52))
 
+#filter out players with low volume to make it neater
 shooting_by_quarter2 <- shooting_by_quarter %>%
-  filter(checkname52 != "elstad,maddie", checkname52 != "henson,megan", checkname52 != "scott,camryn")
+  filter(checkname52 != "johnson,kylie", checkname52 != "tangen,sarah", checkname52 != "howdeshell,sarah")
 
 ggplot(data = shooting_by_quarter2,
        aes(x = quarter,
            y = shooting_pct,
            color = fct_reorder2(checkname52, quarter, shooting_pct))) +
   geom_point() +
+  geom_line() +
   geom_smooth(se = FALSE) +
   labs(title = "Shooting Percentage by Quarter",
        y = "shooting percentage",
@@ -136,18 +141,16 @@ quarterly_shooting <- function(player){
 quarterly_shooting("botten")
 quarterly_shooting("fix")
 quarterly_shooting("hegland")
-quarterly_shooting("howdeshell")
 quarterly_shooting("kelly")
 quarterly_shooting("kormann")
-quarterly_shooting("lewis")
 quarterly_shooting("olmen")
-quarterly_shooting("tangen")
 quarterly_shooting("yagodinski")
+quarterly_shooting("zhen")
 
-#strong first quarter players: botten, fix, hegland, kelly, olmen
-#strong second quarter players: olmen
-#strong third quarter players: kormann, lewis, tangen, yagodinski
-#strong fourth quarter players: fix, kelly, kormann, tangen
+#strong first quarter scorers: hegland, kelly, kormann
+#strong second quarter scorers: hegland, olmen, yagodinski
+#strong third quarter scorers: hegland
+#strong fourth quarter scorers: fix, hegland, kelly, yagodinski
 
 ```
 
@@ -159,8 +162,7 @@ pbp %>%
   mutate(points = ifelse(action == "GOOD" & type == "LAYUP", 2, 0),
          points = ifelse(action == "GOOD" & type == "JUMPER", 2, points),
          points = ifelse(action == "GOOD" & type == "3PTR", 3, points),
-         points = ifelse(action == "GOOD" & type == "LAYUP", 2, points),
-         points = ifelse(action == "GOOD" & type == "FT", 1, points)) %>%
+         points = ifelse(action == "GOOD" & type == "LAYUP", 2, points)) %>%
   summarise(total_points = sum(points),
             shots = sum(action == "GOOD") + sum(action == "MISS"),
             pts_per_shot = total_points/shots) %>%
@@ -183,7 +185,7 @@ pbp %>%
             layup_pct = sum(action == "GOOD" & type == "LAYUP")/
               sum(type == "LAYUP")
             ) %>%
-  filter(layups > 5) %>%
+  #filter(layups > 5) %>%
   arrange(-layup_pct)
 
 pbp %>%
@@ -194,7 +196,7 @@ pbp %>%
             mid_pct = sum(action == "GOOD" & type == "JUMPER")/
               sum(type == "JUMPER")
             ) %>%
-  filter(mid_range > 5) %>%
+  #filter(mid_range > 5) %>%
   arrange(-mid_pct)
 
 pbp %>%
@@ -205,7 +207,7 @@ pbp %>%
             three_pct = sum(action == "GOOD" & type == "3PTR")/
               sum(type == "3PTR")
             ) %>%
-  filter(threes > 5) %>%
+  #filter(threes > 5) %>%
   arrange(-three_pct)
 
 pbp %>%
@@ -215,7 +217,7 @@ pbp %>%
             ft_pct = sum(action == "GOOD" & type == "FT")/
               sum(type == "FT")
             ) %>%
-  filter(fts > 5) %>%
+  #filter(fts > 5) %>%
   arrange(-ft_pct)
 ```
 
