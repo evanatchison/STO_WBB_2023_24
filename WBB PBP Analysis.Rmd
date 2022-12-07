@@ -1,0 +1,280 @@
+---
+title: "WBB PBP Analysis"
+output: html_document
+date: '2022-12-07'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(nlme)
+library(mosaic)
+library(base)
+library(lubridate)
+library(stringr)
+
+source("PBP_Cleaning.R")
+
+pbp <-pbp %>%
+  filter(team == "STO")
+
+pbp2 <- read_csv("PBP_Data_Through_2_16.csv")
+```
+
+```{r}
+pbp %>%
+  group_by(date) %>%
+  filter(action == "GOOD" | action == "MISS") %>%
+  mutate(points_scored = ifelse(action == "GOOD" & type == "LAYUP", 2, 0),
+         points_scored = ifelse(action == "GOOD" & type == "JUMPER", 2, points_scored),
+         points_scored = ifelse(action == "GOOD" & type == "3PTR", 3, points_scored),
+         points_scored = ifelse(action == "GOOD" & type == "LAYUP", 2, points_scored),
+         points_scored = ifelse(action == "GOOD" & type == "FT", 1, points_scored),
+         possession = 1,
+         total_game_points = sum(points_scored),
+         total_game_possessions = sum(possession),
+         exp_pos_pts = total_game_points/total_game_possessions,
+         pts_over_exp = points_scored - exp_pos_pts) %>%
+  ungroup() %>%
+  group_by(checkname52) %>%
+  summarise(points_added = sum(pts_over_exp)) %>%
+  arrange(-points_added)
+
+quarter_max <- pbp %>%
+  group_by(date) %>%
+  filter(action == "GOOD" | action == "MISS") %>%
+  mutate(points_scored = ifelse(action == "GOOD" & type == "LAYUP", 2, 0),
+         points_scored = ifelse(action == "GOOD" & type == "JUMPER", 2, points_scored),
+         points_scored = ifelse(action == "GOOD" & type == "3PTR", 3, points_scored),
+         points_scored = ifelse(action == "GOOD" & type == "LAYUP", 2, points_scored),
+         points_scored = ifelse(action == "GOOD" & type == "FT", 1, points_scored),
+         possession = 1,
+         total_game_points = sum(points_scored),
+         total_game_possessions = sum(possession),
+         exp_pos_pts = total_game_points/total_game_possessions,
+         pts_over_exp = points_scored - exp_pos_pts) %>%
+  ungroup() %>%
+  group_by(checkname52, quarter) %>%
+  summarise(points_added = sum(pts_over_exp)) %>%
+  arrange(quarter, -points_added)
+```
+
+```{r, assist to turnover}
+pbp %>%
+  filter(checkname52 != "TEAM") %>%
+  filter(action == "ASSIST" | action == "TURNOVER") %>%
+  group_by(checkname52) %>%
+  summarise(assists = sum(action == "ASSIST"),
+            turnovers = sum(action == "TURNOVER"),
+            `a/t` = assists/turnovers) %>%
+  arrange(-`a/t`)
+
+#pbp %>%
+  #filter(action == "TURNOVER" | action == "ASSIST") %>%
+  
+```
+
+```{r, shooting pct by quarter}
+shooting_by_quarter <- pbp %>%
+  filter(checkname52 != "TEAM") %>%
+  filter(type != "FT") %>%
+  group_by(checkname52, quarter) %>%
+  mutate(points = ifelse(action == "GOOD" & type == "LAYUP", 2, 0),
+         points = ifelse(action == "GOOD" & type == "JUMPER", 2, points),
+         points = ifelse(action == "GOOD" & type == "3PTR", 3, points),
+         points = ifelse(action == "GOOD" & type == "LAYUP", 2, points),
+         points = ifelse(action == "GOOD" & type == "FT", 1, points)) %>%
+  summarise(total_points = sum(points),
+            shots = sum(action == "GOOD") + sum(action == "MISS"),
+            shooting_pct = sum(action == "GOOD")/
+              (sum(action == "GOOD") + sum(action == "MISS")),
+            shooting_pct = ifelse(is.na(shooting_pct), 0, shooting_pct))
+
+
+ggplot(data = shooting_by_quarter,
+       aes(x = quarter,
+           y = shooting_pct,
+           color = fct_reorder2(checkname52, quarter, shooting_pct))) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  labs(title = "Shooting Percentage by Quarter",
+       y = "shooting percentage",
+       color = "player") +
+  theme_classic()
+
+shooting_by_quarter <- shooting_by_quarter %>%
+  mutate(checkname52 = tolower(checkname52))
+
+shooting_by_quarter2 <- shooting_by_quarter %>%
+  filter(checkname52 != "elstad,maddie", checkname52 != "henson,megan", checkname52 != "scott,camryn")
+
+ggplot(data = shooting_by_quarter2,
+       aes(x = quarter,
+           y = shooting_pct,
+           color = fct_reorder2(checkname52, quarter, shooting_pct))) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  labs(title = "Shooting Percentage by Quarter",
+       y = "shooting percentage",
+       color = "player") +
+  theme_classic()
+
+quarterly_shooting <- function(player){
+  shooting_by_quarter %>%
+    filter(str_detect(checkname52, {{player}})) %>%
+    ggplot(aes(x = quarter, y = shooting_pct)) +
+    geom_point() +
+    geom_smooth() +
+    labs(title = str_c(str_to_upper({{player}}), " Shooting by Quarter"),
+         y = "shooting percentage") +
+    theme_classic()
+}
+
+quarterly_shooting("botten")
+quarterly_shooting("fix")
+quarterly_shooting("hegland")
+quarterly_shooting("howdeshell")
+quarterly_shooting("kelly")
+quarterly_shooting("kormann")
+quarterly_shooting("lewis")
+quarterly_shooting("olmen")
+quarterly_shooting("tangen")
+quarterly_shooting("yagodinski")
+
+#strong first quarter players: botten, fix, hegland, kelly, olmen
+#strong second quarter players: olmen
+#strong third quarter players: kormann, lewis, tangen, yagodinski
+#strong fourth quarter players: fix, kelly, kormann, tangen
+
+```
+
+```{r}
+pbp %>%
+  filter(checkname52 != "TEAM") %>%
+  filter(type != "FT") %>%
+  group_by(checkname52) %>%
+  mutate(points = ifelse(action == "GOOD" & type == "LAYUP", 2, 0),
+         points = ifelse(action == "GOOD" & type == "JUMPER", 2, points),
+         points = ifelse(action == "GOOD" & type == "3PTR", 3, points),
+         points = ifelse(action == "GOOD" & type == "LAYUP", 2, points),
+         points = ifelse(action == "GOOD" & type == "FT", 1, points)) %>%
+  summarise(total_points = sum(points),
+            shots = sum(action == "GOOD") + sum(action == "MISS"),
+            pts_per_shot = total_points/shots) %>%
+  arrange(-pts_per_shot)
+
+pbp %>%
+  filter(checkname52 != "TEAM") %>%
+  filter(action == "GOOD" | action == "MISS") %>%
+  group_by(checkname52) %>%
+  summarise(layups = sum(type == "LAYUP"),
+            mid_range = sum(type == "JUMPER"),
+            threes = sum (type == "3PTR")
+            ) 
+
+pbp %>%
+  filter(checkname52 != "TEAM") %>%
+  filter(action == "GOOD" | action == "MISS") %>%
+  group_by(checkname52) %>%
+  summarise(layups = sum(type == "LAYUP"),
+            layup_pct = sum(action == "GOOD" & type == "LAYUP")/
+              sum(type == "LAYUP")
+            ) %>%
+  filter(layups > 5) %>%
+  arrange(-layup_pct)
+
+pbp %>%
+  filter(checkname52 != "TEAM") %>%
+  filter(action == "GOOD" | action == "MISS") %>%
+  group_by(checkname52) %>%
+  summarise(mid_range = sum(type == "JUMPER"),
+            mid_pct = sum(action == "GOOD" & type == "JUMPER")/
+              sum(type == "JUMPER")
+            ) %>%
+  filter(mid_range > 5) %>%
+  arrange(-mid_pct)
+
+pbp %>%
+  filter(checkname52 != "TEAM") %>%
+  filter(action == "GOOD" | action == "MISS") %>%
+  group_by(checkname52) %>%
+  summarise(threes = sum (type == "3PTR"),
+            three_pct = sum(action == "GOOD" & type == "3PTR")/
+              sum(type == "3PTR")
+            ) %>%
+  filter(threes > 5) %>%
+  arrange(-three_pct)
+
+pbp %>%
+  group_by(checkname52) %>%
+  filter(action == "GOOD" | action == "MISS") %>%
+  summarise(fts = sum(type == "FT"),
+            ft_pct = sum(action == "GOOD" & type == "FT")/
+              sum(type == "FT")
+            ) %>%
+  filter(fts > 5) %>%
+  arrange(-ft_pct)
+```
+
+```{r, true shooting percentage}
+pbp %>%
+  filter(action == "GOOD" | action == "MISS") %>%
+  mutate(points = ifelse(action == "GOOD" & type == "LAYUP", 2, 0),
+         points = ifelse(action == "GOOD" & type == "JUMPER", 2, points),
+         points = ifelse(action == "GOOD" & type == "3PTR", 3, points),
+         points = ifelse(action == "GOOD" & type == "LAYUP", 2, points),
+         points = ifelse(action == "GOOD" & type == "FT", 1, points))%>%
+  group_by(checkname52) %>%
+  summarise(`TS%` = 100*sum(points)/
+              (2*(sum(type == "LAYUP" | type == "JUMPER" | type == "3PTR") +
+                    0.44*sum(type == "FT")
+                  )
+                                   )
+            ) %>%
+  arrange(-`TS%`)
+```
+
+```{r, usage rate}
+usage <- function(player){
+  lineups %>%
+    mutate(Lineup = tolower(Lineup)) %>%
+    mutate(total_mins = sum(game_time)) %>%
+    filter(str_detect(Lineup, {{player}})) %>%
+    full_join(pbp) %>%
+    mutate(checkname52 = tolower(checkname52)) %>%
+    summarise(usage_rate = sum(100 * (sum(action == "MISS" | action == "GOOD" & type != "FT" & str_detect(checkname52, {{player}})) + 0.44 * sum(type == "FT" & str_detect(checkname52, {{player}})) + sum(action == "TURNOVER" & str_detect(checkname52, {{player}}))
+                                  ) * (total_mins/5) /
+                sum(game_time) * (sum(action == "MISS" | action == "GOOD" & type != "FT") + 0.44 * sum(type == "FT") + sum(type == "TURNOVER"))
+              )
+    )
+}
+
+usage("kelly")
+```
+
+```{r, rebound rate}
+rebounding <- function(player){
+  lineups %>%
+    mutate(Lineup = tolower(Lineup)) %>%
+    mutate(total_mins = sum(game_time)) %>%
+    filter(str_detect(Lineup, {{player}})) %>%
+    left_join(pbp2) %>%
+    mutate(checkname52 = tolower(checkname52)) %>%
+    summarise(rebound_rate = 100 * (sum(action == "REBOUND" &
+                                   str_detect(checkname52, {{player}}))
+                                   * total_mins)/
+                (sum(game_time)*sum(action == "REBOUND"))
+              )
+}
+
+rebounding("lewis")
+rebounding("kelly")
+```
+
+```{r, per}
+
+```
+
