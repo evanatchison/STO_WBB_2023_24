@@ -1,0 +1,116 @@
+---
+title: "WBB Lineup Analysis"
+output: html_document
+date: '2022-12-07'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(nlme)
+library(mosaic)
+library(base)
+library(lubridate)
+
+lineups <- read_csv("Lineups_Through_2_16.csv") %>%
+  separate(Time, into = c("min", "sec"), sep = ":") %>%
+  mutate(min = parse_number(min),
+         sec = parse_number(sec),
+         game_time = ((min*60) + sec)/60)
+```
+
+```{r, comparing guards}
+#stats with cassie in the game
+lineups %>%
+  filter(str_detect(Lineup, "Fix C")) %>%
+  summarise(total_mins = sum(game_time),
+            point_diff = sum(Score_Diff)/total_mins,
+            ppm = sum(Pts_Min, na.rm = TRUE)*total_mins/count(Lineup),
+            ppp = sum(PPP)/total_mins
+            )
+
+#stats with k'lynn in the game
+lineups %>%
+  filter(str_detect(Lineup, "Lewis K")) %>%
+  summarise(total_mins = sum(game_time),
+            point_diff = sum(Score_Diff)/total_mins,
+            ppm = sum(Pts_Min, na.rm = TRUE)/total_mins,
+            ppp = sum(PPP)/total_mins
+            )
+
+#stats with both cassie and k'lynn in the game
+lineups %>%
+  filter(str_detect(Lineup, "Lewis K"), str_detect(Lineup, "Fix C")) %>%
+  summarise(total_mins = sum(game_time),
+            point_diff = sum(Score_Diff)/total_mins,
+            ppm = sum(Pts_Min, na.rm = TRUE)/total_mins,
+            ppp = sum(PPP)/total_mins
+            )
+
+#stats with k'lynn in and cassie not in
+lineups %>%
+  filter(str_detect(Lineup, "Lewis K"), str_detect(Lineup, "Fix C", negate = TRUE)) %>%
+  summarise(total_mins = sum(game_time),
+            point_diff = sum(Score_Diff)/total_mins,
+            ppm = sum(Pts_Min, na.rm = TRUE)/total_mins,
+            ppp = sum(PPP)/total_mins
+            )
+
+#stats with cassie in and k'lynn not in
+lineups %>%
+  filter(str_detect(Lineup, "Lewis K", negate = TRUE), str_detect(Lineup, "Fix C")) %>%
+  summarise(total_mins = sum(game_time),
+            point_diff = sum(Score_Diff)/total_mins,
+            ppm = sum(Pts_Min, na.rm = TRUE)/total_mins,
+            ppp = sum(PPP)/total_mins
+            )
+```
+
+```{r, messing around}
+lineups %>%
+  filter(str_detect(Lineup, "Kelly R")) %>%
+  summarise(total_mins = sum(game_time),
+            point_diff = sum(Score_Diff)/total_mins,
+            ppm = sum(Pts_Min, na.rm = TRUE)/total_mins,
+            ppp = sum(PPP)/total_mins
+            )
+
+lineups %>%
+  filter(str_detect(Lineup, "Howdeshell S")) %>%
+  summarise(total_mins = sum(game_time),
+            point_diff = sum(Score_Diff)/nrow(lineups),
+            ppm = sum(Pts_Min, na.rm = TRUE)/nrow(lineups),
+            ppp = sum(PPP)/nrow(lineups)
+            )
+
+analyze <- function(player){
+  lineups %>%
+    mutate(points_allowed = Score - Score_Diff) %>%
+    filter(str_detect(Lineup, player)) %>%
+    summarise(total_mins = sum(game_time),
+            ppm = sum(Score, na.rm = TRUE)/total_mins,
+            ppp = sum(PPP)/total_mins,
+            papm = sum(points_allowed)/total_mins,
+            point_diff = sum(Score_Diff)/total_mins
+            )
+}
+
+analyze("Botten")
+analyze("Fix")
+analyze("Hegland")
+analyze("Kelly")
+analyze("Kormann")
+analyze("Lewis")
+analyze("Olmen")
+analyze("Tangen")
+analyze("Yagodinski")
+```
+
+```{r}
+lineups %>%
+  summarise(minutes = sum(game_time))
+```
+
