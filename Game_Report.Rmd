@@ -1,5 +1,5 @@
 ---
-title: "Game_Report"
+title: "St. Olaf WBB 2022-23 Game_Report"
 author: "St. Olaf Sports Analytics Club"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
@@ -21,6 +21,8 @@ source("PBP_Cleaning.R")
 ```
 
 ```{r, include = F}
+
+
 lu1.0 <- lineups %>%
   separate(Time, into = c("min", "sec"), sep = ":") %>%
   mutate(min = parse_number(min),
@@ -99,68 +101,9 @@ ind_sum_stats %>%
 
 # **Lineup Reports** {.tabset .tabset-fade .tabset-pills}
 
-## 5 Person Lineups {.tabset .tabset-fade .tabset-pills}
 
-```{r, echo = FALSE}
-five_plyr_summary_test <- function(df, player1, player2, player3, player4, player5) {
-  player1_col <- sym(player1)
-  player2_col <- sym(player2)
-  player3_col <- sym(player3)
-  player4_col <- sym(player4)
-  player5_col <- sym(player5)
-  df %>%
-  filter({{player1_col}} == TRUE, {{player2_col}} == TRUE, {{player3_col}} == TRUE, {{player4_col}} == TRUE, {{player5_col}} == TRUE) %>%
-  mutate(pts_allowed = Score - Score_Diff) %>%
-  summarise(mins = sum(total_mins),
-            pts_per_min = sum(Score) / mins,
-            pts_allowed_per_min = sum(pts_allowed) / mins,
-            pt_dif = pts_per_min - pts_allowed_per_min,
-            reb_per_min = sum(Reb) / mins,
-            stl_per_min = sum(Stl) / mins,
-            tov_per_min = sum(Tov) / mins,
-            ast_per_min = sum(Ast) / mins) %>%
-    mutate(player1 = player1,
-           player2 = player2,
-           player3 = player3,
-           player4 = player4,
-           player5 = player5) %>%
-    select(player1:player5, 1:8)
-}
-
-five_person_lineups <- tibble()
-
-for(i in 1:length(players)){
-  for(j in 1:length(players)){
-    if(i < j){
-    for (k in 1:length(players)){
-      if(j < k) {
-      for (l in 1:length(players)){
-          if(k < l) {
-          for (x in 1:length(players)){
-            if(l < x) {
-            hold <- five_plyr_summary_test(lu1.0, players[i], players[j], players[k], players[l], players[x])
-            five_person_lineups <- bind_rows(five_person_lineups, hold)  
-            }
-          }
-        }
-        }
-      }
-    }
-  }
-  }
-}
-
-
-
-five_person_lineups <- five_person_lineups %>%
-  arrange(-mins) %>%
-  filter(mins > 2) 
-
-lu_names5 <- c("Player 1",
-              "Player 2",
-              "Player 3",
-              "Player 4",
-              "Player 5",
+```{r, include = FALSE}
+lu_names <- c("Players",
               "Min", 
               "Pts/Min", 
               "Pts Allowed/Min", 
@@ -170,37 +113,20 @@ lu_names5 <- c("Player 1",
               "TOV/Min",
               "Ast/Min")
 
-colnames(five_person_lineups) <- lu_names5
-
-
-five_person_lineups %>%
-  gt() %>%
-  fmt_number(columns = c(where(is.numeric)), decimals = 2) %>%
-  data_color(
-    columns = c(`Point Diff`),
-    colors = scales::col_numeric(
-      palette = c("red", "green"),
-      domain = c(-2, 2),
-      ), alpha = 0.8
-  ) %>%
-  tab_header(
-    title = md("**5 Player Lineup Summaries STO WBB 22-23**"),
-    subtitle = paste0("Through ", max(pbp$date)))
-
-
-
+num_games <- 2
 ```
 
-## 4 Person Lineups {.tabset .tabset-fade .tabset-pills}
+
+
+
+## 2 Person Lineups {.tabset .tabset-fade .tabset-pills}
 
 ```{r, echo = FALSE}
-four_plyr_summary_test <- function(df, player1, player2, player3, player4) {
+two_plyr_summary_test <- function(df, player1, player2) {
   player1_col <- sym(player1)
   player2_col <- sym(player2)
-  player3_col <- sym(player3)
-  player4_col <- sym(player4)
   df %>%
-  filter({{player1_col}} == TRUE, {{player2_col}} == TRUE, {{player3_col}} == TRUE, {{player4_col}} == TRUE) %>%
+  filter({{player1_col}} == TRUE, {{player2_col}} == TRUE)%>%
   mutate(pts_allowed = Score - Score_Diff) %>%
   summarise(mins = sum(total_mins),
             pts_per_min = sum(Score) / mins,
@@ -209,73 +135,68 @@ four_plyr_summary_test <- function(df, player1, player2, player3, player4) {
             reb_per_min = sum(Reb) / mins,
             stl_per_min = sum(Stl) / mins,
             tov_per_min = sum(Tov) / mins,
-            ast_per_min = sum(Ast) / mins) %>%
+            ast_per_min = sum(Ast) / mins)%>%
     mutate(player1 = player1,
-           player2 = player2,
-           player3 = player3,
-           player4 = player4) %>%
-    select(player1:player4, 1:8)
+           player2 = player2) %>%
+    select(player1, player2, where(is.numeric))
 }
 
-# four_plyr_summary_test(lu1.0, "Kelly", "Fix", "Olmen", "Hegland")%>%
-#   print(width = Inf)
-
-four_person_lineups <- tibble()
+two_person_lineups <- tibble()
 
 for(i in 1:length(players)){
   for(j in 1:length(players)){
     if(i < j){
-    for (k in 1:length(players)){
-      if(j < k) {
-      for (l in 1:length(players)){
-          if(k < l) {
-            hold <- four_plyr_summary_test(lu1.0, players[i], players[j], players[k], players[l])
-            four_person_lineups <- bind_rows(four_person_lineups, hold)  
-          }
-        }
-        }
-      }
+      hold<- two_plyr_summary_test(lu1.0, players[i], players[j])
+      two_person_lineups <- bind_rows(two_person_lineups, hold)
     }
   }
 }
 
 
-four_person_lineups <- four_person_lineups %>%
+two_person_lineups <- two_person_lineups %>%
+  mutate(players = str_c(player1, player2, sep = ", ")) %>%
+  select(players, -(player1:player2), where(is.numeric)) %>%
   arrange(-mins) %>%
-  filter(mins > 2) 
+  filter(mins > 2*num_games) %>%
+  mutate_if(is.numeric, round, digits = 2)
+  
 
-lu_names4 <- c("Player 1",
-              "Player 2",
-              "Player 3",
-              "Player 4",
-              "Min", 
-              "Pts/Min", 
-              "Pts Allowed/Min", 
-              "Point Diff", 
-              "Reb/Min",
-              "Stl/Min",
-              "TOV/Min",
-              "Ast/Min")
+# datatable(batters20, filter = 'top', options = list(
+#   pageLength = 20,
+#   legnthMenu = c(5, 10, 20, 50, 100)
+# ))
 
-colnames(four_person_lineups) <- lu_names4
+datatable(two_person_lineups, 
+          class = 'display order-column',
+          filter = 'top', 
+          colnames = lu_names,
+          options = list(
+  pageLength = 20,
+  lengthMenu = c(5, 10, 20, 40),
+  autoWidth = T
+))
+  
+  # colnames(two_person_lineups) <- lu_names2
 
 
-four_person_lineups %>%
-  gt() %>%
-  fmt_number(columns = c(where(is.numeric)), decimals = 2) %>%
-  data_color(
-    columns = c(`Point Diff`),
-    colors = scales::col_numeric(
-      palette = c("red", "green"),
-      domain = c(-2, 2),
-      ), alpha = 0.8
-  ) %>%
-  tab_header(
-    title = md("**4 Player Lineup Summaries STO WBB 22-23**"),
-    subtitle = paste0("Through ", max(pbp$date)))
-
+# two_person_lineups %>%
+#   gt() %>%
+#   fmt_number(columns = c(where(is.numeric)), decimals = 2) %>%
+#   data_color(
+#     columns = c(`Point Diff`),
+#     colors = scales::col_numeric(
+#       palette = c("red", "green"),
+#       domain = c(-2, 2),
+#       ), alpha = 0.8
+#   ) %>%
+#   tab_header(
+#     title = md("**2 Player Lineup Summaries STO WBB 22-23**"),
+#     subtitle = paste0("Through ", max(pbp$date)))
+  
+  #All 36 two_person lineups voila
 
 ```
+
 
 ## 3 Person Lineups {.tabset .tabset-fade .tabset-pills}
 
@@ -334,37 +255,36 @@ for(i in 1:length(players)){
 }
 
 three_person_lineups <- three_person_lineups %>%
+  mutate(players = str_c(player1, player2, player3, sep = ", ")) %>%
+  select(players, -(player1:player3), where(is.numeric)) %>%
   arrange(-mins) %>%
-  filter(mins > 2) 
+  filter(mins > 3*num_games) %>%
+  mutate_if(is.numeric, round, digits = 2) 
 
-lu_names3 <- c("Player 1",
-              "Player 2",
-              "Player 3",
-              "Min", 
-              "Pts/Min", 
-              "Pts Allowed/Min", 
-              "Point Diff", 
-              "Reb/Min",
-              "Stl/Min",
-              "TOV/Min",
-              "Ast/Min")
-
-colnames(three_person_lineups) <- lu_names3
+datatable(three_person_lineups, 
+          filter = 'top', 
+          colnames = lu_names,
+          class = 'display order-column',
+          options = list(
+  pageLength = 20,
+  lengthMenu = c(5, 10, 20, 40),
+  autoWidth = T
+))
 
 
-three_person_lineups %>%
-  gt() %>%
-  fmt_number(columns = c(where(is.numeric)), decimals = 2) %>%
-  data_color(
-    columns = c(`Point Diff`),
-    colors = scales::col_numeric(
-      palette = c("red", "green"),
-      domain = c(-2, 2),
-      ), alpha = 0.8
-  ) %>%
-  tab_header(
-    title = md("**3 Player Lineup Summaries STO WBB 22-23**"),
-    subtitle = paste0("Through ", max(pbp$date)))
+# three_person_lineups %>%
+#   gt() %>%
+#   fmt_number(columns = c(where(is.numeric)), decimals = 2) %>%
+#   data_color(
+#     columns = c(`Point Diff`),
+#     colors = scales::col_numeric(
+#       palette = c("red", "green"),
+#       domain = c(-2, 2),
+#       ), alpha = 0.8
+#   ) %>%
+#   tab_header(
+#     title = md("**3 Player Lineup Summaries STO WBB 22-23**"),
+#     subtitle = paste0("Through ", max(pbp$date)))
 
 
 #### Trial code to not to do lineup options with a bunch of for loops - unsuccessful for now
@@ -386,14 +306,16 @@ three_person_lineups %>%
 # two_plyr_summary_test(lu1.0, as.character(combos$Var1[1]), as.character(combos$Var2[1]))
 ```
 
-## 2 Person Lineups {.tabset .tabset-fade .tabset-pills}
+## 4 Person Lineups {.tabset .tabset-fade .tabset-pills}
 
 ```{r, echo = FALSE}
-two_plyr_summary_test <- function(df, player1, player2) {
+four_plyr_summary_test <- function(df, player1, player2, player3, player4) {
   player1_col <- sym(player1)
   player2_col <- sym(player2)
+  player3_col <- sym(player3)
+  player4_col <- sym(player4)
   df %>%
-  filter({{player1_col}} == TRUE, {{player2_col}} == TRUE)%>%
+  filter({{player1_col}} == TRUE, {{player2_col}} == TRUE, {{player3_col}} == TRUE, {{player4_col}} == TRUE) %>%
   mutate(pts_allowed = Score - Score_Diff) %>%
   summarise(mins = sum(total_mins),
             pts_per_min = sum(Score) / mins,
@@ -402,79 +324,163 @@ two_plyr_summary_test <- function(df, player1, player2) {
             reb_per_min = sum(Reb) / mins,
             stl_per_min = sum(Stl) / mins,
             tov_per_min = sum(Tov) / mins,
-            ast_per_min = sum(Ast) / mins)%>%
+            ast_per_min = sum(Ast) / mins) %>%
     mutate(player1 = player1,
-           player2 = player2) %>%
-    select(player1, player2, where(is.numeric))
+           player2 = player2,
+           player3 = player3,
+           player4 = player4) %>%
+    select(player1:player4, 1:8)
 }
 
-two_person_lineups <- tibble()
+# four_plyr_summary_test(lu1.0, "Kelly", "Fix", "Olmen", "Hegland")%>%
+#   print(width = Inf)
+
+four_person_lineups <- tibble()
 
 for(i in 1:length(players)){
   for(j in 1:length(players)){
     if(i < j){
-      hold<- two_plyr_summary_test(lu1.0, players[i], players[j])
-      two_person_lineups <- bind_rows(two_person_lineups, hold)
+    for (k in 1:length(players)){
+      if(j < k) {
+      for (l in 1:length(players)){
+          if(k < l) {
+            hold <- four_plyr_summary_test(lu1.0, players[i], players[j], players[k], players[l])
+            four_person_lineups <- bind_rows(four_person_lineups, hold)  
+          }
+        }
+        }
+      }
     }
   }
 }
 
-lu_names2 <- c("Players",
-               "Min", 
-              "Pts/Min", 
-              "Pts Allowed/Min", 
-              "Point Diff", 
-              "Reb/Min",
-              "Stl/Min",
-              "TOV/Min",
-              "Ast/Min")
 
-two_person_lineups <- two_person_lineups %>%
-  mutate(players = str_c(player1, player2, sep = " ")) %>%
-  select(players, -(player1:player2), where(is.numeric)) %>%
+four_person_lineups <- four_person_lineups %>%
+  mutate(players = str_c(player1, player2, player3, player4, sep = ", ")) %>%
+  select(players, -(player1:player4), where(is.numeric)) %>%
   arrange(-mins) %>%
-  filter(mins > 2) %>%
-  mutate_if(is.numeric, round, digits = 2)
-  
+  filter(mins > 2*num_games) %>%
+  mutate_if(is.numeric, round, digits = 2) 
 
-# datatable(batters20, filter = 'top', options = list(
-#   pageLength = 20,
-#   legnthMenu = c(5, 10, 20, 50, 100)
-# ))
-
-datatable(two_person_lineups, 
+datatable(four_person_lineups, 
           filter = 'top', 
-          colnames = lu_names2,
+          colnames = lu_names,
+          class = 'display order-column',
           options = list(
   pageLength = 20,
   lengthMenu = c(5, 10, 20, 40),
   autoWidth = T
 ))
-  
-  # colnames(two_person_lineups) <- lu_names2
 
 
-two_person_lineups %>%
-  gt() %>%
-  fmt_number(columns = c(where(is.numeric)), decimals = 2) %>%
-  data_color(
-    columns = c(`Point Diff`),
-    colors = scales::col_numeric(
-      palette = c("red", "green"),
-      domain = c(-2, 2),
-      ), alpha = 0.8
-  ) %>%
-  tab_header(
-    title = md("**2 Player Lineup Summaries STO WBB 22-23**"),
-    subtitle = paste0("Through ", max(pbp$date)))
-  
-  #All 36 two_person lineups voila
+
+
+# 
+# four_person_lineups %>%
+#   gt() %>%
+#   fmt_number(columns = c(where(is.numeric)), decimals = 2) %>%
+#   data_color(
+#     columns = c(`Point Diff`),
+#     colors = scales::col_numeric(
+#       palette = c("red", "green"),
+#       domain = c(-2, 2),
+#       ), alpha = 0.8
+#   ) %>%
+#   tab_header(
+#     title = md("**4 Player Lineup Summaries STO WBB 22-23**"),
+#     subtitle = paste0("Through ", max(pbp$date)))
+
 
 ```
 
 
-```{r}
+## 5 Person Lineups {.tabset .tabset-fade .tabset-pills}
+
+```{r, echo = FALSE}
+five_plyr_summary_test <- function(df, player1, player2, player3, player4, player5) {
+  player1_col <- sym(player1)
+  player2_col <- sym(player2)
+  player3_col <- sym(player3)
+  player4_col <- sym(player4)
+  player5_col <- sym(player5)
+  df %>%
+  filter({{player1_col}} == TRUE, {{player2_col}} == TRUE, {{player3_col}} == TRUE, {{player4_col}} == TRUE, {{player5_col}} == TRUE) %>%
+  mutate(pts_allowed = Score - Score_Diff) %>%
+  summarise(mins = sum(total_mins),
+            pts_per_min = sum(Score) / mins,
+            pts_allowed_per_min = sum(pts_allowed) / mins,
+            pt_dif = pts_per_min - pts_allowed_per_min,
+            reb_per_min = sum(Reb) / mins,
+            stl_per_min = sum(Stl) / mins,
+            tov_per_min = sum(Tov) / mins,
+            ast_per_min = sum(Ast) / mins) %>%
+    mutate(player1 = player1,
+           player2 = player2,
+           player3 = player3,
+           player4 = player4,
+           player5 = player5) %>%
+    select(player1:player5, 1:8)
+}
+
+five_person_lineups <- tibble()
+
+for(i in 1:length(players)){
+  for(j in 1:length(players)){
+    if(i < j){
+    for (k in 1:length(players)){
+      if(j < k) {
+      for (l in 1:length(players)){
+          if(k < l) {
+          for (x in 1:length(players)){
+            if(l < x) {
+            hold <- five_plyr_summary_test(lu1.0, players[i], players[j], players[k], players[l], players[x])
+            five_person_lineups <- bind_rows(five_person_lineups, hold)  
+            }
+          }
+        }
+        }
+      }
+    }
+  }
+  }
+}
+
+
+five_person_lineups <- five_person_lineups %>%
+  mutate(players = str_c(player1, player2, player3, player4, player5, sep = ", ")) %>%
+  select(players, -(player1:player5), where(is.numeric)) %>%
+  arrange(-mins) %>%
+  filter(mins > num_games) %>%
+  mutate_if(is.numeric, round, digits = 2) 
+
+
+datatable(five_person_lineups, 
+          filter = 'top', 
+          colnames = lu_names,
+          class = 'display order-column',
+          options = list(
+  pageLength = 20,
+  lengthMenu = c(5, 10, 20, 40),
+  autoWidth = T
+))
+
+
+
+# five_person_lineups %>%
+#   gt() %>%
+#   fmt_number(columns = c(where(is.numeric)), decimals = 2) %>%
+#   data_color(
+#     columns = c(`Point Diff`),
+#     colors = scales::col_numeric(
+#       palette = c("red", "green"),
+#       domain = c(-2, 2),
+#       ), alpha = 0.8
+#   ) %>%
+#   tab_header(
+#     title = md("**5 Player Lineup Summaries STO WBB 22-23**"),
+#     subtitle = paste0("Through ", max(pbp$date)))
+
+
 
 ```
-
 
