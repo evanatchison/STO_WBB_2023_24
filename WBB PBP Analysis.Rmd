@@ -20,13 +20,16 @@ library(stringr)
 
 source("PBP_Cleaning.R")
 
+pbp2 <- pbp
+
 pbp <-pbp %>%
   filter(team == "STO")
-
-pbp2 <- pbp
 ```
 
 ```{r}
+#points scored on a possession minus the average points per possession for each game (summed per player)
+#players with a positive number lead to high value possessions when they shoot
+#players with a negative number lead to low value possessions when they shoot
 pbp %>%
   group_by(date) %>%
   filter(action == "GOOD" | action == "MISS") %>%
@@ -45,6 +48,7 @@ pbp %>%
   summarise(points_added = sum(pts_over_exp)) %>%
   arrange(-points_added)
 
+#same table as above, but by quarter
 quarter_max <- pbp %>%
   group_by(date) %>%
   filter(action == "GOOD" | action == "MISS") %>%
@@ -132,8 +136,8 @@ quarterly_shooting <- function(player){
     filter(str_detect(checkname52, {{player}})) %>%
     ggplot(aes(x = quarter, y = shooting_pct)) +
     geom_point() +
-    geom_smooth() +
-    labs(title = str_c(str_to_upper({{player}}), " Shooting by Quarter"),
+    geom_smooth(color = "#CB831A") +
+    labs(title = str_c(str_to_title({{player}}), " Shooting by Quarter"),
          y = "shooting percentage") +
     theme_classic()
 }
@@ -145,7 +149,6 @@ quarterly_shooting("kelly")
 quarterly_shooting("kormann")
 quarterly_shooting("olmen")
 quarterly_shooting("yagodinski")
-quarterly_shooting("zhen")
 
 #strong first quarter scorers: hegland, kelly, kormann
 #strong second quarter scorers: hegland, olmen, yagodinski
@@ -155,6 +158,7 @@ quarterly_shooting("zhen")
 ```
 
 ```{r}
+#points per shot (excluding free throws)
 pbp %>%
   filter(checkname52 != "TEAM") %>%
   filter(type != "FT") %>%
@@ -168,6 +172,7 @@ pbp %>%
             pts_per_shot = total_points/shots) %>%
   arrange(-pts_per_shot)
 
+#shot distribution by player
 pbp %>%
   filter(checkname52 != "TEAM") %>%
   filter(action == "GOOD" | action == "MISS") %>%
@@ -255,6 +260,14 @@ usage <- function(player){
 }
 
 usage("kelly")
+
+lineups %>%
+  filter(str_detect(Lineup, "Botten")) %>%
+    summarise(total_mins = sum(game_time))
+
+lineups %>%
+    summarise(total_mins = sum(game_time))
+
 ```
 
 ```{r, rebound rate}
@@ -265,15 +278,19 @@ rebounding <- function(player){
     filter(str_detect(Lineup, {{player}})) %>%
     left_join(pbp2) %>%
     mutate(checkname52 = tolower(checkname52)) %>%
-    summarise(rebound_rate = 100 * (sum(action == "REBOUND" &
-                                   str_detect(checkname52, {{player}}))
-                                   * total_mins)/
-                (sum(game_time)*sum(action == "REBOUND"))
-              )
+    summarise(rebound_rate = 100 * (sum(action == "REBOUND" & str_detect(checkname52, {{player}})) * (total_mins/5))
+              /(sum(game_time)*sum(action == "REBOUND"))
+              ) %>%
+    head(1)
 }
 
-rebounding("lewis")
+rebounding("botten")
+rebounding("fix")
+rebounding("hegland")
 rebounding("kelly")
+rebounding("kormann")
+rebounding("olmen")
+rebounding("yagodinski")
 ```
 
 ```{r, per}
