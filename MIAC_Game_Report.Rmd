@@ -20,22 +20,25 @@ source("Lineup_Cleaning.R")
 source("PBP_Cleaning.R")
 ```
 
+
+
 #### Games Included
 
 ```{r, echo = FALSE}
-lineups %>%
+miac_lineups %>%
   count(opp, date) %>% 
   select(date, opp, -n) %>%
   arrange(date) %>%
   rename(Date = date,
          Opponent = opp) %>%
   gt() %>%
-  tab_header(title = "All Games Included in this Report")
+  tab_header(title = "MIAC Games Included in this Report")
 ```
 
 
+
 ```{r, include = F}
-lu1.0 <- lineups %>%
+lu1.0 <- miac_lineups %>% # THIS IS THE ONLY LINE DIFFERENT FROM Game_Report.Rmd
   separate(Time, into = c("min", "sec"), sep = ":") %>%
   mutate(min = parse_number(min),
          sec = parse_number(sec),
@@ -55,7 +58,8 @@ lu1.0 <- lineups %>%
 players = c("Hegland", "Olmen", "Fix", "Kelly", "Howdeshell", "Yagodinski", "Johnson", "Tangen", "Kormann", "Botten", "Zhen")
 ```
 
-# **Individual Summary Statistics - All Games**
+
+# **Individual Summary Statistics - MIAC Games**
 
 ```{r, include = FALSE}
 individual_summary <- function(player) {
@@ -109,7 +113,7 @@ ind_sum_stats %>%
 )
 ```
 
-# **Lineup Reports - All Games** {.tabset .tabset-fade .tabset-pills}
+# **Lineup Reports - MIAC Games** {.tabset .tabset-fade .tabset-pills}
 
 
 ```{r, include = FALSE}
