@@ -18,7 +18,7 @@ library(tidyverse)
 
 
 clean_lineups <- function(filename, dt, opponent){
-  new_tibble <- read_excel(str_c("data/", filename, ".xlsx"),
+  new_tibble <- read_excel(str_c("data/lineups/", filename, ".xlsx"),
                            col_types = c("text", "text", "text", "text", "text", "text", "text", "text", "text", "text"))
   new_data <- new_tibble%>%
     rename(Lineup = 1,
@@ -63,3 +63,7 @@ lineups <- clean_lineups("11_11_Alma_Lineups", "11/11/2022", "Alma College") %>%
             clean_lineups("12_7_Gustavus", "12/7/2022", "Gustavus Adolphus College"))
 
 
+miac_lineups <- bind_rows(clean_lineups("11_19_St_Bens", "11/19/2022", "College of St. Benedict"),
+                          clean_lineups("11_30_St_Marys", "11/30/2022", "St. Mary's University"),
+                          clean_lineups("12_3_Hamline", "12/3/2022", "Hamline University"),
+                          clean_lineups("12_7_Gustavus", "12/7/2022", "Gustavus Adolphus College"))
