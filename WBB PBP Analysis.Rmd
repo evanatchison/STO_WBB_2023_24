@@ -20,10 +20,11 @@ library(stringr)
 
 source("PBP_Cleaning.R")
 
-pbp2 <- pbp
-
 pbp <-pbp %>%
   filter(team == "STO")
+
+pbp2 <- pbp
+
 ```
 
 ```{r}
@@ -105,8 +106,8 @@ ggplot(data = shooting_by_quarter,
            y = shooting_pct,
            color = fct_reorder2(checkname52, quarter, shooting_pct))) +
   geom_point() +
-  geom_line() +
-  #geom_smooth(se = FALSE) +
+  #geom_line() +
+  geom_smooth(se = FALSE) +
   labs(title = "Shooting Percentage by Quarter",
        y = "shooting percentage",
        color = "player") +
@@ -117,14 +118,14 @@ shooting_by_quarter <- shooting_by_quarter %>%
 
 #filter out players with low volume to make it neater
 shooting_by_quarter2 <- shooting_by_quarter %>%
-  filter(checkname52 != "johnson,kylie", checkname52 != "tangen,sarah", checkname52 != "howdeshell,sarah")
+  filter(checkname52 != "johnson,kylie", checkname52 != "howdeshell,sarah", checkname52 != "kormann,sophia", checkname52 != "zhen,ziling")
 
 ggplot(data = shooting_by_quarter2,
        aes(x = quarter,
            y = shooting_pct,
            color = fct_reorder2(checkname52, quarter, shooting_pct))) +
   geom_point() +
-  geom_line() +
+  #geom_line() +
   geom_smooth(se = FALSE) +
   labs(title = "Shooting Percentage by Quarter",
        y = "shooting percentage",
