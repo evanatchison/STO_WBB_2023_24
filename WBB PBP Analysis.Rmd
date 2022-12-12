@@ -147,14 +147,14 @@ quarterly_shooting("botten")
 quarterly_shooting("fix")
 quarterly_shooting("hegland")
 quarterly_shooting("kelly")
-quarterly_shooting("kormann")
 quarterly_shooting("olmen")
+quarterly_shooting("tangen")
 quarterly_shooting("yagodinski")
 
-#strong first quarter scorers: hegland, kelly, kormann
-#strong second quarter scorers: hegland, olmen, yagodinski
-#strong third quarter scorers: hegland
-#strong fourth quarter scorers: fix, hegland, kelly, yagodinski
+#strong first quarter shooters: hegland, kelly
+#strong second quarter shooters: hegland, olmen
+#strong third quarter shooters: fix, hegland, kelly, olmen, tangen
+#strong fourth quarter shooters: botten, hegland, tangen, yagodinski
 
 ```
 
@@ -191,7 +191,7 @@ pbp %>%
             layup_pct = sum(action == "GOOD" & type == "LAYUP")/
               sum(type == "LAYUP")
             ) %>%
-  #filter(layups > 5) %>%
+  filter(layups > 5) %>%
   arrange(-layup_pct)
 
 pbp %>%
@@ -202,7 +202,7 @@ pbp %>%
             mid_pct = sum(action == "GOOD" & type == "JUMPER")/
               sum(type == "JUMPER")
             ) %>%
-  #filter(mid_range > 5) %>%
+  filter(mid_range > 5) %>%
   arrange(-mid_pct)
 
 pbp %>%
@@ -213,7 +213,7 @@ pbp %>%
             three_pct = sum(action == "GOOD" & type == "3PTR")/
               sum(type == "3PTR")
             ) %>%
-  #filter(threes > 5) %>%
+  filter(threes > 5) %>%
   arrange(-three_pct)
 
 pbp %>%
@@ -223,7 +223,7 @@ pbp %>%
             ft_pct = sum(action == "GOOD" & type == "FT")/
               sum(type == "FT")
             ) %>%
-  #filter(fts > 5) %>%
+  filter(fts > 5) %>%
   arrange(-ft_pct)
 ```
 
