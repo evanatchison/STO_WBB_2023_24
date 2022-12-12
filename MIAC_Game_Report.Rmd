@@ -1,5 +1,5 @@
 ---
-title: "St. Olaf WBB 2022-23 Game_Report"
+title: "St. Olaf WBB 2022-23 MIAC Game Report"
 author: "St. Olaf Sports Analytics Club"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
@@ -22,8 +22,6 @@ source("PBP_Cleaning.R")
 
 
 
-#### Games Included
-
 ```{r, echo = FALSE}
 miac_lineups %>%
   count(opp, date) %>% 
@@ -34,6 +32,10 @@ miac_lineups %>%
   gt() %>%
   tab_header(title = "MIAC Games Included in this Report")
 ```
+
+
+#### [Link to All Games Statistics](https://matous1.github.io/STO_WBB_2022_23/Game_Report.html) 
+
 
 
 
