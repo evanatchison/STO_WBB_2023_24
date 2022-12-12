@@ -60,10 +60,12 @@ lineups <- clean_lineups("11_11_Alma_Lineups", "11/11/2022", "Alma College") %>%
             clean_lineups("11_19_St_Bens", "11/19/2022", "College of St. Benedict"),
             clean_lineups("11_30_St_Marys", "11/30/2022", "St. Mary's University"),
             clean_lineups("12_3_Hamline", "12/3/2022", "Hamline University"),
-            clean_lineups("12_7_Gustavus", "12/7/2022", "Gustavus Adolphus College"))
+            clean_lineups("12_7_Gustavus", "12/7/2022", "Gustavus Adolphus College"),
+            clean_lineups("12_10_St_Kates_Lineups", "12/10/2022", "St. Catherine Univeristy"))
 
 
 miac_lineups <- bind_rows(clean_lineups("11_19_St_Bens", "11/19/2022", "College of St. Benedict"),
                           clean_lineups("11_30_St_Marys", "11/30/2022", "St. Mary's University"),
                           clean_lineups("12_3_Hamline", "12/3/2022", "Hamline University"),
-                          clean_lineups("12_7_Gustavus", "12/7/2022", "Gustavus Adolphus College"))
+                          clean_lineups("12_7_Gustavus", "12/7/2022", "Gustavus Adolphus College"),
+                          clean_lineups("12_10_St_Kates_Lineups", "12/10/2022", "St. Catherine Univeristy"))
