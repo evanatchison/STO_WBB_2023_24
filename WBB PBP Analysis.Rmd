@@ -46,8 +46,9 @@ pbp %>%
          pts_over_exp = points_scored - exp_pos_pts) %>%
   ungroup() %>%
   group_by(checkname52) %>%
-  summarise(points_added = sum(pts_over_exp)) %>%
-  arrange(-points_added)
+  summarise(total_points_added = sum(pts_over_exp),
+            points_added_per = total_points_added/n()) %>%
+  arrange(-points_added_per)
 
 #same table as above, but by quarter
 quarter_max <- pbp %>%
