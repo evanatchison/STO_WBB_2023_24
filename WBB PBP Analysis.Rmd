@@ -315,3 +315,15 @@ rebounding("yagodinski")
 
 ```
 
+```{r}
+pbp %>%
+  filter(action == "STEAL" | action == "BLOCK" | action == "FOUL") %>%
+  group_by(checkname52) %>%
+  summarise(steals = sum(action == "STEAL"),
+            blocks = sum(action == "BLOCK"),
+            fouls = sum(action == "FOUL"),
+            contests = n(),
+            foul_rate = fouls/contests) %>%
+  arrange(foul_rate)
+```
+
