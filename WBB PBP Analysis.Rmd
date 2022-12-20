@@ -132,6 +132,23 @@ ggplot(data = shooting_by_quarter2,
        color = "player") +
   theme_classic()
 
+#just starters
+shooting_by_quarter3 <- shooting_by_quarter2 %>%
+  filter(checkname52 != "tangen,sarah", checkname52 != "botten,cayden")
+
+#just starters
+ggplot(data = shooting_by_quarter3,
+       aes(x = quarter,
+           y = shooting_pct,
+           color = fct_reorder2(checkname52, quarter, shooting_pct))) +
+  geom_point() +
+  #geom_line() +
+  geom_smooth(se = FALSE) +
+  labs(title = "Shooting Percentage by Quarter",
+       y = "shooting percentage",
+       color = "player") +
+  theme_classic()
+
 quarterly_shooting <- function(player){
   shooting_by_quarter %>%
     filter(str_detect(checkname52, {{player}})) %>%
