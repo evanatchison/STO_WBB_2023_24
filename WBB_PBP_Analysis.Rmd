@@ -1,8 +1,8 @@
 ---
 title: "WBB PBP Analysis"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 editor_options:
   chunk_output_type: console
@@ -10,7 +10,7 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-tinytex::install_tinytex()
+#tinytex::install_tinytex()
 
 library(tidyverse)
 library(ggplot2)
@@ -90,7 +90,7 @@ pbp %>%
   
 ```
 
-```{r, shooting pct by quarter}
+```{r, shooting pct by quarter, warning = FALSE}
 shooting_by_quarter <- pbp %>%
   filter(checkname52 != "TEAM") %>%
   filter(type != "FT") %>%
@@ -268,7 +268,7 @@ pbp %>%
   arrange(-`TS%`)
 ```
 
-```{r, usage rate}
+```{r, usage rate, error = TRUE}
 usage <- function(player){
   lineups %>%
     mutate(Lineup = tolower(Lineup)) %>%
@@ -294,7 +294,7 @@ lineups %>%
 
 ```
 
-```{r, rebound rate}
+```{r, rebound rate, error = TRUE}
 rebounding <- function(player){
   lineups %>%
     mutate(Lineup = tolower(Lineup)) %>%
