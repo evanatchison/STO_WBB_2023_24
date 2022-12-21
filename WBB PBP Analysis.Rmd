@@ -20,6 +20,8 @@ library(stringr)
 
 source("PBP_Cleaning.R")
 
+pbp_full <- pbp
+
 pbp <-pbp %>%
   filter(team == "STO")
 
@@ -326,5 +328,66 @@ pbp %>%
             contests = n(),
             foul_rate = fouls/contests) %>%
   arrange(foul_rate)
+```
+
+```{r}
+#proportions of players rebounds that are offensive rebounds
+pbp %>%
+  filter(action == "REBOUND") %>%
+  filter(checkname52 != "TEAM") %>%
+  group_by(checkname52) %>%
+  summarise(offensive = sum(type == "OFF"),
+            defensive = sum(type == "DEF"),
+            total = n(),
+            off_reb_rate = offensive/total) %>%
+  arrange(-off_reb_rate)
+
+pbp_full %>%
+  filter(action == "REBOUND") %>%
+  group_by(date) %>%
+  summarise(sto_off = sum(team == "STO" & type == "OFF"),
+            sto_def = sum(team == "STO" & type == "DEF"),
+            opp_off = sum(team != "STO" & type == "OFF"),
+            opp_def = sum(team != "STO" & type == "DEF"),
+            orb_pct = sto_off/(sto_off + opp_def),
+            drb_pct = sto_def/(sto_def + opp_off)) %>%
+  add_column(result = c(1,1,1,0,0,0,0))
+#games where rebounding is higher generally corellate strongly with wins
+```
+
+```{r}
+game_shooting <- pbp %>%
+  filter(checkname52 != "TEAM") %>%
+  filter(action == "GOOD" | action == "MISS") %>%
+  group_by(date) %>%
+  summarise(layups = sum(type == "LAYUP"),
+            mid_range = sum(type == "JUMPER"),
+            threes = sum (type == "3PTR"),
+            layup_pct = sum(action == "GOOD" & type == "LAYUP") / layups,
+            mid_pct = sum(action == "GOOD" & type == "JUMPER") / mid_range,
+            three_pct = sum(action == "GOOD" & type == "3PTR") / threes
+            )
+
+game_shooting
+
+game_shooting %>%
+  ggplot(aes(x = date, y = three_pct)) +
+  geom_point() +
+  geom_line(color = "#CB831A") +
+  theme_classic()
+#three pointers have recently gotten significantly better
+
+game_shooting %>%
+  ggplot(aes(x = date, y = mid_pct)) +
+  geom_point() +
+  geom_line(color = "#CB831A") +
+  theme_classic()
+#mid range shots have been relatively consistent outside of the 11/19 game
+
+game_shooting %>%
+  ggplot(aes(x = date, y = layup_pct)) +
+  geom_point() +
+  geom_line(color = "#CB831A") +
+  theme_classic()
 ```
 
