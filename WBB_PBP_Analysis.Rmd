@@ -1,13 +1,16 @@
 ---
 title: "WBB PBP Analysis"
-output: html_document
-date: '2022-12-07'
-editor_options: 
+output:
+  pdf_document: default
+  html_document: default
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+editor_options:
   chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+#tinytex::install_tinytex()
 
 library(tidyverse)
 library(ggplot2)
@@ -19,6 +22,8 @@ library(lubridate)
 library(stringr)
 
 source("PBP_Cleaning.R")
+
+pbp_full <- pbp
 
 pbp <-pbp %>%
   filter(team == "STO")
@@ -46,8 +51,9 @@ pbp %>%
          pts_over_exp = points_scored - exp_pos_pts) %>%
   ungroup() %>%
   group_by(checkname52) %>%
-  summarise(points_added = sum(pts_over_exp)) %>%
-  arrange(-points_added)
+  summarise(total_points_added = sum(pts_over_exp),
+            points_added_per = total_points_added/n()) %>%
+  arrange(-points_added_per)
 
 #same table as above, but by quarter
 quarter_max <- pbp %>%
@@ -84,7 +90,7 @@ pbp %>%
   
 ```
 
-```{r, shooting pct by quarter}
+```{r, shooting pct by quarter, warning = FALSE}
 shooting_by_quarter <- pbp %>%
   filter(checkname52 != "TEAM") %>%
   filter(type != "FT") %>%
@@ -121,6 +127,23 @@ shooting_by_quarter2 <- shooting_by_quarter %>%
   filter(checkname52 != "johnson,kylie", checkname52 != "howdeshell,sarah", checkname52 != "kormann,sophia", checkname52 != "zhen,ziling")
 
 ggplot(data = shooting_by_quarter2,
+       aes(x = quarter,
+           y = shooting_pct,
+           color = fct_reorder2(checkname52, quarter, shooting_pct))) +
+  geom_point() +
+  #geom_line() +
+  geom_smooth(se = FALSE) +
+  labs(title = "Shooting Percentage by Quarter",
+       y = "shooting percentage",
+       color = "player") +
+  theme_classic()
+
+#just starters
+shooting_by_quarter3 <- shooting_by_quarter2 %>%
+  filter(checkname52 != "tangen,sarah", checkname52 != "botten,cayden")
+
+#just starters
+ggplot(data = shooting_by_quarter3,
        aes(x = quarter,
            y = shooting_pct,
            color = fct_reorder2(checkname52, quarter, shooting_pct))) +
@@ -245,7 +268,7 @@ pbp %>%
   arrange(-`TS%`)
 ```
 
-```{r, usage rate}
+```{r, usage rate, error = TRUE}
 usage <- function(player){
   lineups %>%
     mutate(Lineup = tolower(Lineup)) %>%
@@ -271,7 +294,7 @@ lineups %>%
 
 ```
 
-```{r, rebound rate}
+```{r, rebound rate, error = TRUE}
 rebounding <- function(player){
   lineups %>%
     mutate(Lineup = tolower(Lineup)) %>%
@@ -296,5 +319,78 @@ rebounding("yagodinski")
 
 ```{r, per}
 
+```
+
+```{r}
+pbp %>%
+  filter(action == "STEAL" | action == "BLOCK" | action == "FOUL") %>%
+  group_by(checkname52) %>%
+  summarise(steals = sum(action == "STEAL"),
+            blocks = sum(action == "BLOCK"),
+            fouls = sum(action == "FOUL"),
+            contests = n(),
+            foul_rate = fouls/contests) %>%
+  arrange(foul_rate)
+```
+
+```{r}
+#proportions of players rebounds that are offensive rebounds
+pbp %>%
+  filter(action == "REBOUND") %>%
+  filter(checkname52 != "TEAM") %>%
+  group_by(checkname52) %>%
+  summarise(offensive = sum(type == "OFF"),
+            defensive = sum(type == "DEF"),
+            total = n(),
+            off_reb_rate = offensive/total) %>%
+  arrange(-off_reb_rate)
+
+pbp_full %>%
+  filter(action == "REBOUND") %>%
+  group_by(date) %>%
+  summarise(sto_off = sum(team == "STO" & type == "OFF"),
+            sto_def = sum(team == "STO" & type == "DEF"),
+            opp_off = sum(team != "STO" & type == "OFF"),
+            opp_def = sum(team != "STO" & type == "DEF"),
+            orb_pct = sto_off/(sto_off + opp_def),
+            drb_pct = sto_def/(sto_def + opp_off)) %>%
+  add_column(result = c(1,1,1,0,0,0,0))
+#games where rebounding is higher generally corellate strongly with wins
+```
+
+```{r}
+game_shooting <- pbp %>%
+  filter(checkname52 != "TEAM") %>%
+  filter(action == "GOOD" | action == "MISS") %>%
+  group_by(date) %>%
+  summarise(layups = sum(type == "LAYUP"),
+            mid_range = sum(type == "JUMPER"),
+            threes = sum (type == "3PTR"),
+            layup_pct = sum(action == "GOOD" & type == "LAYUP") / layups,
+            mid_pct = sum(action == "GOOD" & type == "JUMPER") / mid_range,
+            three_pct = sum(action == "GOOD" & type == "3PTR") / threes
+            )
+
+game_shooting
+
+game_shooting %>%
+  ggplot(aes(x = date, y = three_pct)) +
+  geom_point() +
+  geom_line(color = "#CB831A") +
+  theme_classic()
+#three pointers have recently gotten significantly better
+
+game_shooting %>%
+  ggplot(aes(x = date, y = mid_pct)) +
+  geom_point() +
+  geom_line(color = "#CB831A") +
+  theme_classic()
+#mid range shots have been relatively consistent outside of the 11/19 game
+
+game_shooting %>%
+  ggplot(aes(x = date, y = layup_pct)) +
+  geom_point() +
+  geom_line(color = "#CB831A") +
+  theme_classic()
 ```
 
