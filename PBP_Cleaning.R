@@ -38,5 +38,17 @@ pbp <- clean_pbp("11_11_Alma_PBP") %>%
             clean_pbp("11_19_St_Bens_PBP"),
             clean_pbp("11_30_St_Marys_PBP"),
             clean_pbp("12_3_Hamline_PBP"),
-            clean_pbp("12_7_Gustavus_PBP"))
+            clean_pbp("12_7_Gustavus_PBP"),
+            clean_pbp("1_4_Macalester_PBP"),
+            clean_pbp("1_7_Bethel_PBP"),
+            clean_pbp("1_11_Carleton_PBP"))
+
+
+miac_pbp <- bind_rows(clean_pbp("11_19_St_Bens_PBP"),
+            clean_pbp("11_30_St_Marys_PBP"),
+            clean_pbp("12_3_Hamline_PBP"),
+            clean_pbp("12_7_Gustavus_PBP"),
+            clean_pbp("1_4_Macalester_PBP"),
+            clean_pbp("1_7_Bethel_PBP"),
+            clean_pbp("1_11_Carleton_PBP"))
 
