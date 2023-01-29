@@ -41,7 +41,12 @@ pbp <- clean_pbp("11_11_Alma_PBP") %>%
             clean_pbp("12_7_Gustavus_PBP"),
             clean_pbp("1_4_Macalester_PBP"),
             clean_pbp("1_7_Bethel_PBP"),
-            clean_pbp("1_11_Carleton_PBP"))
+            clean_pbp("1_11_Carleton_PBP"),
+            clean_pbp("1_14_Augsburg_PBP"),
+            clean_pbp("1_16_St_Scholastica_PBP"),
+            clean_pbp("1_18_Gustavus_PBP"),
+            clean_pbp("1_21_Hamline_PBP"),
+            clean_pbp("1_25_Concordia_Moorhead_PBP"))
 
 
 miac_pbp <- bind_rows(clean_pbp("11_19_St_Bens_PBP"),
@@ -50,5 +55,10 @@ miac_pbp <- bind_rows(clean_pbp("11_19_St_Bens_PBP"),
             clean_pbp("12_7_Gustavus_PBP"),
             clean_pbp("1_4_Macalester_PBP"),
             clean_pbp("1_7_Bethel_PBP"),
-            clean_pbp("1_11_Carleton_PBP"))
+            clean_pbp("1_11_Carleton_PBP"),
+            clean_pbp("1_14_Augsburg_PBP"),
+            clean_pbp("1_16_St_Scholastica_PBP"),
+            clean_pbp("1_18_Gustavus_PBP"),
+            clean_pbp("1_21_Hamline_PBP"),
+            clean_pbp("1_25_Concordia_Moorhead_PBP"))
 

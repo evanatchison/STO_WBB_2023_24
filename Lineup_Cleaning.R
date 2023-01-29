@@ -64,7 +64,12 @@ lineups <- clean_lineups("11_11_Alma_Lineups", "11/11/2022", "Alma College") %>%
             clean_lineups("12_10_St_Kates_Lineups", "12/10/2022", "St. Catherine Univeristy"),
             clean_lineups("1_4_Macalester", "1/4/2023", "Macalester University"),
             clean_lineups("1_7_Bethel", "1/7/2023", "Bethel University"),
-            clean_lineups("1_11_Carleton", "1/11/2023", "Carleton College"))
+            clean_lineups("1_11_Carleton", "1/11/2023", "Carleton College"),
+            clean_lineups("1_14_Augsburg_Lineups", "1/14/2023", "Augsburg University"),
+            clean_lineups("1_16_St_Scholastica_Lineups", "1/16/2023", "College of St. Scholastica"),
+            clean_lineups("1_18_Gustavus_Lineups", "1/18/2023", "Gustavus Adolphus College"),
+            clean_lineups("1_21_Hamline_Lineups", "1/21/2023", "Hamline University"),
+            clean_lineups("1_25_Concordia_Moorhead_Lineups", "1/25/2023", "Concordia Moorhead College"))
 
 
 miac_lineups <- bind_rows(clean_lineups("11_19_St_Bens", "11/19/2022", "College of St. Benedict"),
@@ -74,4 +79,9 @@ miac_lineups <- bind_rows(clean_lineups("11_19_St_Bens", "11/19/2022", "College 
                           clean_lineups("12_10_St_Kates_Lineups", "12/10/2022", "St. Catherine Univeristy"),
                           clean_lineups("1_4_Macalester", "1/4/2023", "Macalester University"),
                           clean_lineups("1_7_Bethel", "1/7/2023", "Bethel University"),
-                          clean_lineups("1_11_Carleton", "1/11/2023", "Carleton College"))
+                          clean_lineups("1_11_Carleton", "1/11/2023", "Carleton College"),
+                          clean_lineups("1_14_Augsburg_Lineups", "1/14/2023", "Augsburg University"),
+                          clean_lineups("1_16_St_Scholastica_Lineups", "1/16/2023", "College of St. Scholastica"),
+                          clean_lineups("1_18_Gustavus_Lineups", "1/18/2023", "Gustavus Adolphus College"),
+                          clean_lineups("1_21_Hamline_Lineups", "1/21/2023", "Hamline University"),
+                          clean_lineups("1_25_Concordia_Moorhead_Lineups", "1/25/2023", "Concordia Moorhead College"))
