@@ -69,7 +69,15 @@ lineups <- clean_lineups("11_11_Alma_Lineups", "11/11/2022", "Alma College") %>%
             clean_lineups("1_16_St_Scholastica_Lineups", "1/16/2023", "College of St. Scholastica"),
             clean_lineups("1_18_Gustavus_Lineups", "1/18/2023", "Gustavus Adolphus College"),
             clean_lineups("1_21_Hamline_Lineups", "1/21/2023", "Hamline University"),
-            clean_lineups("1_25_Concordia_Moorhead_Lineups", "1/25/2023", "Concordia Moorhead College"))
+            clean_lineups("1_25_Concordia_Moorhead_Lineups", "1/25/2023", "Concordia Moorhead College"),
+            clean_lineups("1_28_St_Bens_Lineups", "1/28/2023", "College of St. Benedict"),
+            clean_lineups("1_30_Carleton_Lineups", "1/30/2023", "Carleton College"),
+            clean_lineups("2_1_St_Marys_Lineups", "2/1/2023", "St. Mary's University"),
+            clean_lineups("2_4_Augsburg_Lineups", "2/4/2023", "Augsburg Univeristy"),
+            clean_lineups("2_8_Macalester_Lineups", "2/8/2023", "Macalester College"),
+            clean_lineups("2_11_Bethel_Lineups", "2/11/2023", "Bethel University"),
+            clean_lineups("2_15_St_Scholastica_Lineups", "2/15/2023", "College of St. Scholastica"),
+            clean_lineups("2_18_St_Kates_Lineups", "2/18/2023", "St. Catherine Univeristy"))
 
 
 miac_lineups <- bind_rows(clean_lineups("11_19_St_Bens", "11/19/2022", "College of St. Benedict"),
@@ -84,4 +92,12 @@ miac_lineups <- bind_rows(clean_lineups("11_19_St_Bens", "11/19/2022", "College 
                           clean_lineups("1_16_St_Scholastica_Lineups", "1/16/2023", "College of St. Scholastica"),
                           clean_lineups("1_18_Gustavus_Lineups", "1/18/2023", "Gustavus Adolphus College"),
                           clean_lineups("1_21_Hamline_Lineups", "1/21/2023", "Hamline University"),
-                          clean_lineups("1_25_Concordia_Moorhead_Lineups", "1/25/2023", "Concordia Moorhead College"))
+                          clean_lineups("1_25_Concordia_Moorhead_Lineups", "1/25/2023", "Concordia Moorhead College"),
+                          clean_lineups("1_28_St_Bens_Lineups", "1/28/2023", "College of St. Benedict"),
+                          clean_lineups("1_30_Carleton_Lineups", "1/30/2023", "Carleton College"),
+                          clean_lineups("2_1_St_Marys_Lineups", "2/1/2023", "St. Mary's University"),
+                          clean_lineups("2_4_Augsburg_Lineups", "2/4/2023", "Augsburg Univeristy"),
+                          clean_lineups("2_8_Macalester_Lineups", "2/8/2023", "Macalester College"),
+                          clean_lineups("2_11_Bethel_Lineups", "2/11/2023", "Bethel University"),
+                          clean_lineups("2_15_St_Scholastica_Lineups", "2/15/2023", "College of St. Scholastica"),
+                          clean_lineups("2_18_St_Kates_Lineups", "2/18/2023", "St. Catherine Univeristy"))
